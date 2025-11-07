@@ -101,21 +101,31 @@ function handleHealthCheck(env: Env): Response {
  * Handle MCP JSON-RPC requests
  */
 async function handleMCP(request: Request, env: Env): Promise<Response> {
+  console.log('=== MCP Request Received ===');
+  console.log('Timestamp:', new Date().toISOString());
+  console.log('Method:', request.method);
+  console.log('URL:', request.url);
+
   // Extract and validate API token
   const apiToken = extractToken(request, env);
 
   if (!apiToken) {
+    console.log('❌ Authentication failed: No API token provided');
     return errorResponse('Missing DA Admin API token. Please provide it in the Authorization header.', 401);
   }
 
+  console.log('✅ Authentication: Token present (length:', apiToken.length, ')');
+
   // Only accept POST requests with JSON body
   if (request.method !== 'POST') {
+    console.log('❌ Invalid method:', request.method);
     return errorResponse('MCP endpoint only accepts POST requests', 405);
   }
 
   try {
     // Parse JSON-RPC request
     const jsonrpcRequest = await request.json();
+    console.log('📥 JSON-RPC Request:', JSON.stringify(jsonrpcRequest, null, 2));
 
     // Create MCP server with the user's DA API token
     const server = createMCPServer(apiToken, env.DA_ADMIN_BASE_URL);
@@ -123,10 +133,14 @@ async function handleMCP(request: Request, env: Env): Promise<Response> {
     // Process the request through MCP server
     const response = await server.handleRequest(jsonrpcRequest);
 
+    console.log('📤 JSON-RPC Response:', JSON.stringify(response, null, 2));
+    console.log('=== MCP Request Completed ===\n');
+
     // Return JSON-RPC response
     return successResponse(response);
   } catch (error) {
-    console.error('MCP handler error:', error);
+    console.error('❌ MCP handler error:', error);
+    console.log('=== MCP Request Failed ===\n');
 
     const message = error instanceof Error ? error.message : 'Internal server error';
     return errorResponse(`MCP Error: ${message}`, 500);

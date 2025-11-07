@@ -1,0 +1,32 @@
+{
+  "name": "mcp-da-live-admin-remote",
+  "version": "1.0.0",
+  "description": "Remote MCP server for DA Live Admin API on Cloudflare Workers",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest",
+    "test:watch": "vitest watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "keywords": [
+    "mcp",
+    "cloudflare-workers",
+    "da-live",
+    "document-authoring"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "wrangler": "^3.98.0"
+  }
+}

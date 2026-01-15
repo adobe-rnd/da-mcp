@@ -148,9 +148,9 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   "mcpServers": {
     "da-live-admin": {
       "type": "streamable-http",
-      "url": "https://mcp-da-admin.your-account.workers.dev/mcp",
+      "url": "https://mcp-da-admin.franklin-prod.workers.dev/mcp",
       "headers": {
-        "Authorization": "Bearer YOUR_DA_ADMIN_TOKEN"
+        "Authorization": "Bearer YOUR_DA_USER_IMS_TOKEN"
       }
     }
   }
@@ -163,13 +163,15 @@ Add to `.vscode/mcp.json` or Cursor settings:
 
 ```json
 {
-  "servers": {
-    "da-live-admin": {
-      "type": "streamable-http",
-      "url": "https://mcp-da-admin.your-account.workers.dev/mcp",
+  "mcpServers": {
+    "da-admin-mcp-direct": {
+      "url": "https://mcp-da-admin.franklin-prod.workers.dev/mcp",
       "headers": {
-        "Authorization": "Bearer YOUR_DA_ADMIN_TOKEN"
+        "Authorization": "Bearer YOUR_DA_USER_IMS_TOKEN"
       }
+    },
+    "da-prod-mcp": {
+      "url": "https://mcp.adobeaemcloud.com/adobe/mcp/da"
     }
   }
 }
@@ -186,13 +188,13 @@ The server uses simple token pass-through authentication:
 **Authorization Header Format:**
 
 ```
-Authorization: Bearer YOUR_DA_ADMIN_TOKEN
+Authorization: Bearer YOUR_DA_USER_IMS_TOKEN
 ```
 
 or simply:
 
 ```
-Authorization: YOUR_DA_ADMIN_TOKEN
+Authorization: YOUR_DA_USER_IMS_TOKEN
 ```
 
 **Note:** If you are accessing the API through the public (authenticated) URL of the API router, IMS (Adobe Identity Management Service) login is automatically handled by the AEM API router. In this case, you do *not* need to provide a DA Admin API token in the `Authorization` header—the IMS login flow will provide authentication for you.
@@ -258,35 +260,6 @@ wrangler tail
 wrangler tail --env production
 ```
 
-## Security Considerations
-
-- **Token Security**: DA Admin tokens are never logged or stored
-- **HTTPS Only**: All communication is encrypted (enforced by Cloudflare)
-- **CORS**: Configured for secure cross-origin requests
-- **Input Validation**: All tool inputs are validated against schemas
-- **Rate Limiting**: Inherits Cloudflare Workers rate limiting
-
-## Troubleshooting
-
-### "Missing DA Admin API token"
-
-Ensure your MCP client configuration includes the Authorization header with your DA Admin API token.
-
-### "Request timeout"
-
-The default timeout is 30 seconds. Large operations may need optimization or the DA Admin API may be slow.
-
-### "401 Unauthorized from DA API"
-
-Your DA Admin token may be invalid or expired. Generate a new token and update your client configuration.
-
-### Tools not appearing in Claude
-
-1. Restart Claude Desktop after configuration changes
-2. Check the configuration file path is correct
-3. Verify the Worker URL is accessible
-4. Check Claude Desktop logs for connection errors
-
 ## Monitoring
 
 Monitor your deployed Worker:
@@ -294,13 +267,6 @@ Monitor your deployed Worker:
 1. **Cloudflare Dashboard**: View invocations, errors, and performance
 2. **Wrangler Tail**: Real-time logs (`wrangler tail`)
 3. **Health Endpoint**: Regular health checks at `/health`
-
-## Future Enhancements
-
-- [ ] OAuth 2.1 authentication flow
-- [ ] Cloudflare KV for token storage
-- [ ] Rate limiting per user
-- [ ] Caching for frequently accessed resources
 
 ## Contributing
 
@@ -310,16 +276,3 @@ Contributions are welcome! Please:
 2. Create a feature branch
 3. Make your changes with tests
 4. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file for details
-
-## Resources
-
-- [MCP Documentation](https://modelcontextprotocol.io/)
-- [MCP Specification](https://spec.modelcontextprotocol.io/)
-- [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/)
-- [Cloudflare MCP Guide](https://developers.cloudflare.com/agents/guides/remote-mcp-server/)
-- [DA Live Documentation](https://da.live/)
-- [MCP Inspector](https://inspector.modelcontextprotocol.io/)

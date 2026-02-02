@@ -5,7 +5,9 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "wrangler dev",
+    "dev:local": "wrangler dev --env local --port 3008",
     "deploy": "wrangler deploy",
+    "deploy:dev": "wrangler deploy --env development",
     "test": "vitest",
     "test:watch": "vitest watch",
     "type-check": "tsc --noEmit",

@@ -3,11 +3,24 @@ main = "src/index.ts"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Local development - points to local da-admin
+[env.local]
+name = "mcp-da-admin-local"
+[env.local.vars]
+ENVIRONMENT = "local"
+DA_ADMIN_BASE_URL = "http://localhost:8787"
+
 [env.development]
 name = "mcp-da-admin-dev"
+[env.development.vars]
+ENVIRONMENT = "development"
+DA_ADMIN_BASE_URL = "https://admin.da.live"
 
 [env.production]
 name = "mcp-da-admin"
+[env.production.vars]
+ENVIRONMENT = "production"
+DA_ADMIN_BASE_URL = "https://admin.da.live"
 
 [vars]
 ENVIRONMENT = "development"

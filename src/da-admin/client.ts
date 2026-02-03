@@ -293,4 +293,43 @@ export class DAAdminClient {
     const endpoint = `/media/${org}/${repo}/${mediaPath}`;
     return this.request<DAMediaReference>(endpoint);
   }
+
+  /**
+   * Upload media (images, files) to a DA repository
+   * @param org Organization name
+   * @param repo Repository name
+   * @param path Destination path for the media file (e.g., "media/my-image.png")
+   * @param base64Data Base64-encoded file content
+   * @param mimeType MIME type of the file (e.g., "image/png", "image/jpeg")
+   * @param fileName Original filename
+   */
+  async uploadMedia(
+    org: string,
+    repo: string,
+    path: string,
+    base64Data: string,
+    mimeType: string,
+    fileName: string
+  ): Promise<DAOperationResponse> {
+    const endpoint = `/source/${org}/${repo}/${path}`;
+
+    // Decode base64 to binary
+    const binaryString = atob(base64Data);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    // Create Blob with the correct MIME type
+    const blob = new Blob([bytes], { type: mimeType });
+
+    // Create FormData and append the blob with filename
+    const formData = new FormData();
+    formData.append('data', blob, fileName);
+
+    return this.request<DAOperationResponse>(endpoint, {
+      method: 'POST',
+      body: formData,
+    });
+  }
 }

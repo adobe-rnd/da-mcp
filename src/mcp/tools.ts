@@ -308,4 +308,43 @@ export const tools = [
       required: ['org', 'repo', 'fragmentPath'],
     },
   },
+  {
+    name: 'da_upload_media',
+    description:
+      'Upload an image or media file to a DA repository. Use attachmentId to reference an attached file (server injects the data), OR provide base64Data directly.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        org: {
+          type: 'string',
+          description: 'Organization name',
+        },
+        repo: {
+          type: 'string',
+          description: 'Repository name',
+        },
+        path: {
+          type: 'string',
+          description: 'Destination path for the media file (e.g., "media/my-image.png")',
+        },
+        attachmentId: {
+          type: 'string',
+          description: 'Reference to an attached file (e.g., "attachment_1"). Server will inject the actual data.',
+        },
+        base64Data: {
+          type: 'string',
+          description: 'Base64-encoded file content (optional if attachmentId is provided)',
+        },
+        mimeType: {
+          type: 'string',
+          description: 'MIME type of the file (optional if attachmentId is provided)',
+        },
+        fileName: {
+          type: 'string',
+          description: 'Original filename (optional if attachmentId is provided)',
+        },
+      },
+      required: ['org', 'repo', 'path'],
+    },
+  },
 ];

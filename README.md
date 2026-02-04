@@ -1,4 +1,4 @@
-# DA Live Admin - Remote MCP Server
+# da-mcp
 
 A remote Model Context Protocol (MCP) server for Document Authoring (DA). This server provides LLM assistants like Claude or ChatGPT with direct access to DA management operations.
 
@@ -131,7 +131,7 @@ wrangler deploy --env development
 After deployment, your MCP server is accessible at:
 
 - **Direct MCP Endpoint:**  
-  [`https://mcp-da-admin.franklin-prod.workers.dev/mcp`](https://mcp-da-admin.franklin-prod.workers.dev/mcp)
+  [`https://da-mcp.franklin-prod.workers.dev/mcp`](https://da-mcp.franklin-prod.workers.dev/mcp)
 
 - **IMS-Authenticated via AEM API Router:**  
   [`https://mcp.adobeaemcloud.com/adobe/mcp/da`](https://mcp.adobeaemcloud.com/adobe/mcp/da)  
@@ -148,7 +148,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   "mcpServers": {
     "da-live-admin": {
       "type": "streamable-http",
-      "url": "https://mcp-da-admin.franklin-prod.workers.dev/mcp",
+      "url": "https://da-mcp.franklin-prod.workers.dev/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_DA_USER_IMS_TOKEN"
       }
@@ -165,7 +165,7 @@ Add to `.vscode/mcp.json` or Cursor settings:
 {
   "mcpServers": {
     "da-admin-mcp-direct": {
-      "url": "https://mcp-da-admin.franklin-prod.workers.dev/mcp",
+      "url": "https://da-mcp.franklin-prod.workers.dev/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_DA_USER_IMS_TOKEN"
       }
@@ -226,7 +226,7 @@ Health check endpoint returning server status.
 ```json
 {
   "status": "healthy",
-  "service": "mcp-da-admin",
+  "service": "da-mcp",
   "version": "1.0.0",
   "environment": "production",
   "timestamp": "2025-01-07T12:00:00.000Z"

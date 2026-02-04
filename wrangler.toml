@@ -14,24 +14,26 @@ ENVIRONMENT = "dev"
 # CI environment
 [env.ci]
 name = "da-mcp-ci"
-[env.ci.vars]
-VERSION = "@@VERSION@@-ci"
-ENVIRONMENT = "ci"
-
 services = [
   { binding = "daadmin", service = "da-admin-stage" }
 ]
 
+[env.ci.vars]
+VERSION = "@@VERSION@@-ci"
+ENVIRONMENT = "ci"
+
+
+
 # Production environment
 [env.production]
 name = "da-mcp"
-[env.production.vars]
-VERSION = "@@VERSION@@"
-ENVIRONMENT = "production"
-
 services = [
   { binding = "daadmin", service = "da-admin" }
 ]
+
+[env.production.vars]
+VERSION = "@@VERSION@@"
+ENVIRONMENT = "production"
 
 [observability]
 [observability.logs]

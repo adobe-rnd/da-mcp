@@ -64,7 +64,7 @@ function errorResponse(message: string, status: number = 500): Response {
         'Content-Type': 'application/json',
         ...CORS_HEADERS,
       },
-    }
+    },
   );
 }
 
@@ -80,7 +80,7 @@ function successResponse(data: any, status: number = 200): Response {
         'Content-Type': 'application/json',
         ...CORS_HEADERS,
       },
-    }
+    },
   );
 }
 

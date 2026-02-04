@@ -13,7 +13,7 @@ function formatError(error: unknown): string {
   if (typeof error === 'object' && error !== null && 'status' in error) {
     const daError = error as DAAPIError;
     return `DA Admin API Error (${daError.status}): ${daError.message}${
-      daError.details ? '\n' + JSON.stringify(daError.details, null, 2) : ''
+      daError.details ? `\n${JSON.stringify(daError.details, null, 2)}` : ''
     }`;
   }
 
@@ -29,7 +29,7 @@ function formatError(error: unknown): string {
  */
 export async function handleListSources(
   client: DAAdminClient,
-  args: { org: string; repo: string; path?: string }
+  args: { org: string; repo: string; path?: string },
 ) {
   try {
     const response = await client.listSources(args.org, args.repo, args.path || '');
@@ -59,7 +59,7 @@ export async function handleListSources(
  */
 export async function handleGetSource(
   client: DAAdminClient,
-  args: { org: string; repo: string; path: string }
+  args: { org: string; repo: string; path: string },
 ) {
   try {
     const response = await client.getSource(args.org, args.repo, args.path);
@@ -89,7 +89,7 @@ export async function handleGetSource(
  */
 export async function handleCreateSource(
   client: DAAdminClient,
-  args: { org: string; repo: string; path: string; content: string; contentType?: string }
+  args: { org: string; repo: string; path: string; content: string; contentType?: string },
 ) {
   try {
     const response = await client.createSource(
@@ -97,7 +97,7 @@ export async function handleCreateSource(
       args.repo,
       args.path,
       args.content,
-      args.contentType
+      args.contentType,
     );
     return {
       content: [
@@ -125,7 +125,7 @@ export async function handleCreateSource(
  */
 export async function handleUpdateSource(
   client: DAAdminClient,
-  args: { org: string; repo: string; path: string; content: string; contentType?: string }
+  args: { org: string; repo: string; path: string; content: string; contentType?: string },
 ) {
   try {
     const response = await client.updateSource(
@@ -133,7 +133,7 @@ export async function handleUpdateSource(
       args.repo,
       args.path,
       args.content,
-      args.contentType
+      args.contentType,
     );
     return {
       content: [
@@ -161,7 +161,7 @@ export async function handleUpdateSource(
  */
 export async function handleDeleteSource(
   client: DAAdminClient,
-  args: { org: string; repo: string; path: string }
+  args: { org: string; repo: string; path: string },
 ) {
   try {
     const response = await client.deleteSource(args.org, args.repo, args.path);
@@ -191,14 +191,14 @@ export async function handleDeleteSource(
  */
 export async function handleCopyContent(
   client: DAAdminClient,
-  args: { org: string; repo: string; sourcePath: string; destinationPath: string }
+  args: { org: string; repo: string; sourcePath: string; destinationPath: string },
 ) {
   try {
     const response = await client.copyContent(
       args.org,
       args.repo,
       args.sourcePath,
-      args.destinationPath
+      args.destinationPath,
     );
     return {
       content: [
@@ -226,14 +226,14 @@ export async function handleCopyContent(
  */
 export async function handleMoveContent(
   client: DAAdminClient,
-  args: { org: string; repo: string; sourcePath: string; destinationPath: string }
+  args: { org: string; repo: string; sourcePath: string; destinationPath: string },
 ) {
   try {
     const response = await client.moveContent(
       args.org,
       args.repo,
       args.sourcePath,
-      args.destinationPath
+      args.destinationPath,
     );
     return {
       content: [
@@ -261,7 +261,7 @@ export async function handleMoveContent(
  */
 export async function handleGetVersions(
   client: DAAdminClient,
-  args: { org: string; repo: string; path: string }
+  args: { org: string; repo: string; path: string },
 ) {
   try {
     const response = await client.getVersions(args.org, args.repo, args.path);
@@ -291,7 +291,7 @@ export async function handleGetVersions(
  */
 export async function handleGetConfig(
   client: DAAdminClient,
-  args: { org: string; repo: string; configPath?: string }
+  args: { org: string; repo: string; configPath?: string },
 ) {
   try {
     const response = await client.getConfig(args.org, args.repo, args.configPath);
@@ -321,7 +321,7 @@ export async function handleGetConfig(
  */
 export async function handleUpdateConfig(
   client: DAAdminClient,
-  args: { org: string; repo: string; config: any; configPath?: string }
+  args: { org: string; repo: string; config: any; configPath?: string },
 ) {
   try {
     const response = await client.updateConfig(args.org, args.repo, args.config, args.configPath);
@@ -351,7 +351,7 @@ export async function handleUpdateConfig(
  */
 export async function handleLookupMedia(
   client: DAAdminClient,
-  args: { org: string; repo: string; mediaPath: string }
+  args: { org: string; repo: string; mediaPath: string },
 ) {
   try {
     const response = await client.lookupMedia(args.org, args.repo, args.mediaPath);

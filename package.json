@@ -3,13 +3,23 @@
   "version": "1.0.0",
   "description": "Remote MCP server for DA Live Admin API on Cloudflare Workers",
   "main": "src/index.ts",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adobe-rnd/da-mcp.git"
+  },
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "test": "vitest",
+    "deploy:ci": "node prepare-deploy.js && wrangler deploy -e ci -c wrangler-versioned.toml",
+    "deploy:production": "node prepare-deploy.js && wrangler deploy -e production -c wrangler-versioned.toml",
+    "lint": "eslint .",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest watch",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src"
+    "prepare": "husky",
+    "semantic-release": "semantic-release",
+    "semantic-release-dry": "semantic-release --dry-run --no-ci --branches $CI_BRANCH"
   },
   "keywords": [
     "mcp",
@@ -17,16 +27,28 @@
     "da-live",
     "document-authoring"
   ],
-  "author": "",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4"
   },
   "devDependencies": {
+    "@adobe/eslint-config-helix": "^2.0.8",
     "@cloudflare/workers-types": "^4.20241218.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "eslint": "^8.57.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.1",
+    "semantic-release": "^24.2.7",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8",
     "wrangler": "^4.46.0"
+  },
+  "lint-staged": {
+    "*.{js,ts}": "eslint --fix"
   }
 }

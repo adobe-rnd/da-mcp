@@ -3,14 +3,25 @@ main = "src/index.ts"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
-[env.development]
-name = "mcp-da-admin-dev"
+[vars]
+VERSION = "@@VERSION@@-dev"
+ENVIRONMENT = "dev"
+DA_ADMIN_BASE_URL = "https://admin.da.live"
 
+# CI environment
+[env.ci]
+name = "mcp-da-admin-ci"
+[env.ci.vars]
+VERSION = "@@VERSION@@-ci"
+ENVIRONMENT = "ci"
+DA_ADMIN_BASE_URL = "https://admin.da.live"
+
+# Production environment
 [env.production]
 name = "mcp-da-admin"
-
-[vars]
-ENVIRONMENT = "development"
+[env.production.vars]
+VERSION = "@@VERSION@@"
+ENVIRONMENT = "production"
 DA_ADMIN_BASE_URL = "https://admin.da.live"
 
 [observability]

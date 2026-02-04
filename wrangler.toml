@@ -22,8 +22,6 @@ services = [
 VERSION = "@@VERSION@@-ci"
 ENVIRONMENT = "ci"
 
-
-
 # Production environment
 [env.production]
 name = "da-mcp"

@@ -294,4 +294,16 @@ export class DAAdminClient {
     const endpoint = `/media/${org}/${repo}/${mediaPath}`;
     return this.request<DAMediaReference>(endpoint);
   }
+
+  /**
+   * Lookup fragment references
+   */
+  async lookupFragment(
+    org: string,
+    repo: string,
+    fragmentPath: string,
+  ): Promise<DAMediaReference> {
+    const endpoint = `/fragment/${org}/${repo}/${fragmentPath}`;
+    return this.request<DAMediaReference>(endpoint);
+  }
 }

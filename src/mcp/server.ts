@@ -17,6 +17,7 @@ import {
   handleGetConfig,
   handleUpdateConfig,
   handleLookupMedia,
+  handleLookupFragment,
 } from './handlers';
 
 /**
@@ -142,6 +143,9 @@ export class MCPServer {
 
       case 'da_lookup_media':
         return handleLookupMedia(this.client, args);
+
+      case 'da_lookup_fragment':
+        return handleLookupFragment(this.client, args);
 
       default:
         return {

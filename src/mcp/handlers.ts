@@ -5,6 +5,7 @@
 
 import { DAAdminClient } from '../da-admin/client';
 import { DAAPIError } from '../da-admin/types';
+import { normalizePath, ensureHtmlExtension } from '../utils/path';
 
 /**
  * Format error for MCP client
@@ -32,7 +33,8 @@ export async function handleListSources(
   args: { org: string; repo: string; path?: string },
 ) {
   try {
-    const response = await client.listSources(args.org, args.repo, args.path || '');
+    const normalizedPath = normalizePath(args.path || '') || '';
+    const response = await client.listSources(args.org, args.repo, normalizedPath);
     return {
       content: [
         {
@@ -62,7 +64,8 @@ export async function handleGetSource(
   args: { org: string; repo: string; path: string },
 ) {
   try {
-    const response = await client.getSource(args.org, args.repo, args.path);
+    const normalizedPath = ensureHtmlExtension(normalizePath(args.path))!;
+    const response = await client.getSource(args.org, args.repo, normalizedPath);
     return {
       content: [
         {
@@ -92,10 +95,11 @@ export async function handleCreateSource(
   args: { org: string; repo: string; path: string; content: string; contentType?: string },
 ) {
   try {
+    const normalizedPath = ensureHtmlExtension(normalizePath(args.path))!;
     const response = await client.createSource(
       args.org,
       args.repo,
-      args.path,
+      normalizedPath,
       args.content,
       args.contentType,
     );
@@ -128,10 +132,11 @@ export async function handleUpdateSource(
   args: { org: string; repo: string; path: string; content: string; contentType?: string },
 ) {
   try {
+    const normalizedPath = ensureHtmlExtension(normalizePath(args.path))!;
     const response = await client.updateSource(
       args.org,
       args.repo,
-      args.path,
+      normalizedPath,
       args.content,
       args.contentType,
     );
@@ -164,7 +169,8 @@ export async function handleDeleteSource(
   args: { org: string; repo: string; path: string },
 ) {
   try {
-    const response = await client.deleteSource(args.org, args.repo, args.path);
+    const normalizedPath = ensureHtmlExtension(normalizePath(args.path))!;
+    const response = await client.deleteSource(args.org, args.repo, normalizedPath);
     return {
       content: [
         {
@@ -194,11 +200,13 @@ export async function handleCopyContent(
   args: { org: string; repo: string; sourcePath: string; destinationPath: string },
 ) {
   try {
+    const normalizedSourcePath = ensureHtmlExtension(normalizePath(args.sourcePath))!;
+    const normalizedDestinationPath = ensureHtmlExtension(normalizePath(args.destinationPath))!;
     const response = await client.copyContent(
       args.org,
       args.repo,
-      args.sourcePath,
-      args.destinationPath,
+      normalizedSourcePath,
+      normalizedDestinationPath,
     );
     return {
       content: [
@@ -229,11 +237,13 @@ export async function handleMoveContent(
   args: { org: string; repo: string; sourcePath: string; destinationPath: string },
 ) {
   try {
+    const normalizedSourcePath = ensureHtmlExtension(normalizePath(args.sourcePath))!;
+    const normalizedDestinationPath = ensureHtmlExtension(normalizePath(args.destinationPath))!;
     const response = await client.moveContent(
       args.org,
       args.repo,
-      args.sourcePath,
-      args.destinationPath,
+      normalizedSourcePath,
+      normalizedDestinationPath,
     );
     return {
       content: [
@@ -264,7 +274,8 @@ export async function handleGetVersions(
   args: { org: string; repo: string; path: string },
 ) {
   try {
-    const response = await client.getVersions(args.org, args.repo, args.path);
+    const normalizedPath = ensureHtmlExtension(normalizePath(args.path))!;
+    const response = await client.getVersions(args.org, args.repo, normalizedPath);
     return {
       content: [
         {
@@ -294,7 +305,8 @@ export async function handleGetConfig(
   args: { org: string; repo: string; configPath?: string },
 ) {
   try {
-    const response = await client.getConfig(args.org, args.repo, args.configPath);
+    const normalizedConfigPath = normalizePath(args.configPath);
+    const response = await client.getConfig(args.org, args.repo, normalizedConfigPath);
     return {
       content: [
         {
@@ -324,7 +336,13 @@ export async function handleUpdateConfig(
   args: { org: string; repo: string; config: any; configPath?: string },
 ) {
   try {
-    const response = await client.updateConfig(args.org, args.repo, args.config, args.configPath);
+    const normalizedConfigPath = normalizePath(args.configPath);
+    const response = await client.updateConfig(
+      args.org,
+      args.repo,
+      args.config,
+      normalizedConfigPath,
+    );
     return {
       content: [
         {
@@ -354,7 +372,39 @@ export async function handleLookupMedia(
   args: { org: string; repo: string; mediaPath: string },
 ) {
   try {
-    const response = await client.lookupMedia(args.org, args.repo, args.mediaPath);
+    const normalizedMediaPath = normalizePath(args.mediaPath)!;
+    const response = await client.lookupMedia(args.org, args.repo, normalizedMediaPath);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(response, null, 2),
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: formatError(error),
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
+/**
+ * Handler for da_lookup_fragment tool
+ */
+export async function handleLookupFragment(
+  client: DAAdminClient,
+  args: { org: string; repo: string; fragmentPath: string },
+) {
+  try {
+    const normalizedFragmentPath = normalizePath(args.fragmentPath)!;
+    const response = await client.lookupFragment(args.org, args.repo, normalizedFragmentPath);
     return {
       content: [
         {

@@ -14,7 +14,7 @@
     "deploy:ci": "node prepare-deploy.js && wrangler deploy -e ci -c wrangler-versioned.toml",
     "deploy:production": "node prepare-deploy.js && wrangler deploy -e production -c wrangler-versioned.toml",
     "lint": "eslint .",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "test:watch": "vitest watch",
     "type-check": "tsc --noEmit",
     "prepare": "husky",
@@ -23,9 +23,9 @@
   },
   "keywords": [
     "mcp",
-    "cloudflare-workers",
-    "da-live",
-    "document-authoring"
+    "da-mcp",
+    "document-authoring",
+    "da"
   ],
   "license": "Apache-2.0",
   "dependencies": {
@@ -46,7 +46,7 @@
     "semantic-release": "^24.2.7",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8",
-    "wrangler": "^4.46.0"
+    "wrangler": "^4.62.0"
   },
   "lint-staged": {
     "*.{js,ts}": "eslint --fix"

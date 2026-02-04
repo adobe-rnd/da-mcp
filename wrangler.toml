@@ -3,26 +3,35 @@ main = "src/index.ts"
 compatibility_date = "2025-11-17"
 compatibility_flags = ["nodejs_compat"]
 
+services = [
+  { binding = "daadmin", service = "da-admin-dev" }
+]
+
 [vars]
 VERSION = "@@VERSION@@-dev"
 ENVIRONMENT = "dev"
-DA_ADMIN_BASE_URL = "https://admin.da.live"
 
 # CI environment
 [env.ci]
 name = "da-mcp-ci"
+services = [
+  { binding = "daadmin", service = "da-admin-stage" }
+]
+
 [env.ci.vars]
 VERSION = "@@VERSION@@-ci"
 ENVIRONMENT = "ci"
-DA_ADMIN_BASE_URL = "https://admin.da.live"
 
 # Production environment
 [env.production]
 name = "da-mcp"
+services = [
+  { binding = "daadmin", service = "da-admin" }
+]
+
 [env.production.vars]
 VERSION = "@@VERSION@@"
 ENVIRONMENT = "production"
-DA_ADMIN_BASE_URL = "https://admin.da.live"
 
 [observability]
 [observability.logs]

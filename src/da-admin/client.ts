@@ -17,30 +17,28 @@ import {
 export class DAAdminClient {
   private apiToken: string;
 
-  private baseUrl: string;
+  private daadminService: Fetcher;
 
   private timeout: number;
 
   constructor(options: DAAdminClientOptions) {
     this.apiToken = options.apiToken;
-    this.baseUrl = options.baseUrl || 'https://admin.da.live';
+    this.daadminService = options.daadminService;
     this.timeout = options.timeout || 30000; // 30 seconds default
   }
 
   /**
-   * Make an authenticated request to the DA Admin API
+   * Make an authenticated request to the DA Admin API via service binding
    */
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
   ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
     const method = options.method || 'GET';
 
-    console.log('DA Admin API Call:');
+    console.log('DA Admin API Call (via service binding):');
     console.log('  Method:', method);
     console.log('  Endpoint:', endpoint);
-    console.log('  Full URL:', url);
 
     const headers = new Headers(options.headers || {});
     headers.set('Authorization', `Bearer ${this.apiToken}`);
@@ -65,11 +63,15 @@ export class DAAdminClient {
     const startTime = Date.now();
 
     try {
-      const response = await fetch(url, {
-        ...options,
+      // Create a Request object for the service binding
+      const request = new Request(`https://daadmin${endpoint}`, {
+        method,
         headers,
+        body: options.body,
         signal: controller.signal,
       });
+
+      const response = await this.daadminService.fetch(request);
 
       clearTimeout(timeoutId);
 

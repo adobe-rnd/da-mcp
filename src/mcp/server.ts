@@ -26,10 +26,10 @@ import {
 export class MCPServer {
   private client: DAAdminClient;
 
-  constructor(apiToken: string, baseUrl?: string) {
+  constructor(daadminService: Fetcher, apiToken: string) {
     this.client = new DAAdminClient({
       apiToken,
-      baseUrl: baseUrl || 'https://admin.da.live',
+      daadminService,
     });
   }
 
@@ -164,6 +164,6 @@ export class MCPServer {
 /**
  * Create and configure MCP server
  */
-export function createMCPServer(apiToken: string, baseUrl?: string): MCPServer {
-  return new MCPServer(apiToken, baseUrl);
+export function createMCPServer(daadminService: Fetcher, apiToken: string): MCPServer {
+  return new MCPServer(daadminService, apiToken);
 }

@@ -63,7 +63,7 @@ export interface DAOperationResponse {
 
 export interface DAAdminClientOptions {
   apiToken: string;
-  baseUrl?: string;
+  daadminService: Fetcher; // Service binding to DA Admin worker
   timeout?: number;
 }
 

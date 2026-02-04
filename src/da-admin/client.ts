@@ -16,7 +16,9 @@ import {
 
 export class DAAdminClient {
   private apiToken: string;
+
   private baseUrl: string;
+
   private timeout: number;
 
   constructor(options: DAAdminClientOptions) {
@@ -30,7 +32,7 @@ export class DAAdminClient {
    */
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const method = options.method || 'GET';
@@ -111,10 +113,9 @@ export class DAAdminClient {
 
       if (error instanceof Error && error.name === 'AbortError') {
         console.log('DA Admin API Timeout after', this.timeout, 'ms');
-        throw {
-          status: 408,
-          message: 'Request timeout',
-        } as DAAPIError;
+        const timeoutError = new Error('Request timeout') as Error & DAAPIError;
+        timeoutError.status = 408;
+        throw timeoutError;
       }
 
       console.log('DA Admin API Request Failed:', error);
@@ -128,7 +129,7 @@ export class DAAdminClient {
   async listSources(
     org: string,
     repo: string,
-    path: string = ''
+    path: string = '',
   ): Promise<DAListSourcesResponse> {
     const endpoint = `/list/${org}/${repo}${path ? `/${path}` : ''}`;
     return this.request<DAListSourcesResponse>(endpoint);
@@ -140,7 +141,7 @@ export class DAAdminClient {
   async getSource(
     org: string,
     repo: string,
-    path: string
+    path: string,
   ): Promise<DASourceContent> {
     const endpoint = `/source/${org}/${repo}/${path}`;
     return this.request<DASourceContent>(endpoint);
@@ -154,7 +155,7 @@ export class DAAdminClient {
     repo: string,
     path: string,
     content: string,
-    contentType?: string
+    contentType?: string,
   ): Promise<DAOperationResponse> {
     const endpoint = `/source/${org}/${repo}/${path}`;
 
@@ -179,7 +180,7 @@ export class DAAdminClient {
     repo: string,
     path: string,
     content: string,
-    contentType?: string
+    contentType?: string,
   ): Promise<DAOperationResponse> {
     const endpoint = `/source/${org}/${repo}/${path}`;
 
@@ -202,7 +203,7 @@ export class DAAdminClient {
   async deleteSource(
     org: string,
     repo: string,
-    path: string
+    path: string,
   ): Promise<DAOperationResponse> {
     const endpoint = `/source/${org}/${repo}/${path}`;
     return this.request<DAOperationResponse>(endpoint, {
@@ -217,7 +218,7 @@ export class DAAdminClient {
     org: string,
     repo: string,
     sourcePath: string,
-    destinationPath: string
+    destinationPath: string,
   ): Promise<DAOperationResponse> {
     const endpoint = `/copy/${org}/${repo}`;
     return this.request<DAOperationResponse>(endpoint, {
@@ -233,7 +234,7 @@ export class DAAdminClient {
     org: string,
     repo: string,
     sourcePath: string,
-    destinationPath: string
+    destinationPath: string,
   ): Promise<DAOperationResponse> {
     const endpoint = `/move/${org}/${repo}`;
     return this.request<DAOperationResponse>(endpoint, {
@@ -248,7 +249,7 @@ export class DAAdminClient {
   async getVersions(
     org: string,
     repo: string,
-    path: string
+    path: string,
   ): Promise<DAVersionsResponse> {
     const endpoint = `/versions/${org}/${repo}/${path}`;
     return this.request<DAVersionsResponse>(endpoint);
@@ -260,7 +261,7 @@ export class DAAdminClient {
   async getConfig(
     org: string,
     repo: string,
-    configPath?: string
+    configPath?: string,
   ): Promise<DAConfig> {
     const endpoint = `/config/${org}/${repo}${configPath ? `/${configPath}` : ''}`;
     return this.request<DAConfig>(endpoint);
@@ -273,7 +274,7 @@ export class DAAdminClient {
     org: string,
     repo: string,
     config: DAConfig,
-    configPath?: string
+    configPath?: string,
   ): Promise<DAOperationResponse> {
     const endpoint = `/config/${org}/${repo}${configPath ? `/${configPath}` : ''}`;
     return this.request<DAOperationResponse>(endpoint, {
@@ -288,7 +289,7 @@ export class DAAdminClient {
   async lookupMedia(
     org: string,
     repo: string,
-    mediaPath: string
+    mediaPath: string,
   ): Promise<DAMediaReference> {
     const endpoint = `/media/${org}/${repo}/${mediaPath}`;
     return this.request<DAMediaReference>(endpoint);

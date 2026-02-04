@@ -1,6 +1,6 @@
 /**
  * Cloudflare Worker Entry Point
- * Main handler for the DA Live Admin MCP Server
+ * Main handler for the da-mcp Server
  */
 
 import { createMCPServer } from './mcp/server';
@@ -64,7 +64,7 @@ function errorResponse(message: string, status: number = 500): Response {
         'Content-Type': 'application/json',
         ...CORS_HEADERS,
       },
-    }
+    },
   );
 }
 
@@ -80,7 +80,7 @@ function successResponse(data: any, status: number = 200): Response {
         'Content-Type': 'application/json',
         ...CORS_HEADERS,
       },
-    }
+    },
   );
 }
 
@@ -90,7 +90,7 @@ function successResponse(data: any, status: number = 200): Response {
 function handleHealthCheck(env: Env): Response {
   return successResponse({
     status: 'healthy',
-    service: 'mcp-da-admin',
+    service: 'da-mcp',
     version: '1.0.0',
     environment: env.ENVIRONMENT || 'development',
     timestamp: new Date().toISOString(),

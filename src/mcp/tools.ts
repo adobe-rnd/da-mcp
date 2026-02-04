@@ -1,6 +1,6 @@
 /**
  * MCP Tool Definitions
- * Define all available tools for DA Live Admin operations
+ * Define all available tools for da-mcp operations
  */
 
 export const tools = [

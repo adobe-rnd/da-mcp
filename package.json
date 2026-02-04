@@ -45,7 +45,7 @@
     "lint-staged": "^15.5.1",
     "semantic-release": "^24.2.7",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8",
+    "vitest": "^4.0.0",
     "wrangler": "^4.46.0"
   },
   "lint-staged": {

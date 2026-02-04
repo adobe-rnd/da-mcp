@@ -1,3 +1,11 @@
+## [1.0.1](https://github.com/adobe-rnd/da-mcp/compare/v1.0.0...v1.0.1) (2026-02-04)
+
+
+### Bug Fixes
+
+* bindings config ([c672662](https://github.com/adobe-rnd/da-mcp/commit/c6726627f11ff86a8316a83923fbe0717a5d2e21))
+* use correct worker bindings to da-admin ([19b847a](https://github.com/adobe-rnd/da-mcp/commit/19b847a93ef356d240c0078ab397a94c53e40580))
+
 # 1.0.0 (2026-02-04)
 
 

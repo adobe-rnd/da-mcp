@@ -26,15 +26,14 @@ export interface DASourceContent {
 }
 
 export interface DAVersion {
-  version: string;
-  timestamp: string;
-  author?: string;
-  message?: string;
+  timestamp: number;
+  path: string;
+  url?: string;
+  users: {email: string}[];
 }
 
 export interface DAVersionsResponse {
   versions: DAVersion[];
-  path: string;
 }
 
 export interface DAConfig {
@@ -63,7 +62,7 @@ export interface DAOperationResponse {
 
 export interface DAAdminClientOptions {
   apiToken: string;
-  daadminService: Fetcher; // Service binding to DA Admin worker
+  daadminService: Fetcher;
   timeout?: number;
 }
 

@@ -129,14 +129,9 @@ async function handleMCP(request: Request, env: Env): Promise<Response> {
 
     // Create MCP server with the user's DA API token and service binding
     const server = createMCPServer(env.daadmin, apiToken);
-
-    // Process the request through MCP server
     const response = await server.handleRequest(jsonrpcRequest);
-
-    console.log('JSON-RPC Response:', JSON.stringify(response, null, 2));
     console.log('=== MCP Request Completed ===\n');
 
-    // Return JSON-RPC response
     return successResponse(response);
   } catch (error) {
     console.error('MCP handler error:', error);

@@ -213,56 +213,6 @@ export const tools = [
     },
   },
   {
-    name: 'da_get_config',
-    description:
-      'Get configuration for a DA repository. Can retrieve global or path-specific configurations.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        org: {
-          type: 'string',
-          description: 'Organization name',
-        },
-        repo: {
-          type: 'string',
-          description: 'Repository name',
-        },
-        configPath: {
-          type: 'string',
-          description: 'Optional specific configuration path',
-        },
-      },
-      required: ['org', 'repo'],
-    },
-  },
-  {
-    name: 'da_update_config',
-    description:
-      'Update configuration for a DA repository. Can update global or path-specific configurations.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        org: {
-          type: 'string',
-          description: 'Organization name',
-        },
-        repo: {
-          type: 'string',
-          description: 'Repository name',
-        },
-        config: {
-          type: 'object',
-          description: 'Configuration object to update',
-        },
-        configPath: {
-          type: 'string',
-          description: 'Optional specific configuration path',
-        },
-      },
-      required: ['org', 'repo', 'config'],
-    },
-  },
-  {
     name: 'da_lookup_media',
     description:
       'Lookup media references in a DA repository. Returns information about media assets including URLs and metadata.',

@@ -14,8 +14,6 @@ import {
   handleCopyContent,
   handleMoveContent,
   handleGetVersions,
-  handleGetConfig,
-  handleUpdateConfig,
   handleLookupMedia,
   handleLookupFragment,
 } from './handlers';
@@ -134,12 +132,6 @@ export class MCPServer {
 
       case 'da_get_versions':
         return handleGetVersions(this.client, args);
-
-      case 'da_get_config':
-        return handleGetConfig(this.client, args);
-
-      case 'da_update_config':
-        return handleUpdateConfig(this.client, args);
 
       case 'da_lookup_media':
         return handleLookupMedia(this.client, args);

@@ -10,8 +10,6 @@ import {
   handleCopyContent,
   handleMoveContent,
   handleGetVersions,
-  handleGetConfig,
-  handleUpdateConfig,
   handleLookupMedia,
   handleLookupFragment,
 } from '../../src/mcp/handlers';
@@ -32,8 +30,6 @@ describe('Handler path normalization', () => {
       copyContent: vi.fn().mockResolvedValue({ success: true }),
       moveContent: vi.fn().mockResolvedValue({ success: true }),
       getVersions: vi.fn().mockResolvedValue({ versions: [] }),
-      getConfig: vi.fn().mockResolvedValue({ config: {} }),
-      updateConfig: vi.fn().mockResolvedValue({ success: true }),
       lookupMedia: vi.fn().mockResolvedValue({ url: '' }),
       lookupFragment: vi.fn().mockResolvedValue({ url: '' }),
     };
@@ -217,39 +213,6 @@ describe('Handler path normalization', () => {
     it('should add .html extension when not provided', async () => {
       await handleGetVersions(mockClient, { org: 'test', repo: 'repo', path: 'docs/page' });
       expect(mockClient.getVersions).toHaveBeenCalledWith('test', 'repo', 'docs/page.html');
-    });
-  });
-
-  describe('handleGetConfig', () => {
-    it('should normalize configPath with leading slash', async () => {
-      await handleGetConfig(mockClient, { org: 'test', repo: 'repo', configPath: '/custom' });
-      expect(mockClient.getConfig).toHaveBeenCalledWith('test', 'repo', 'custom');
-    });
-
-    it('should handle undefined configPath', async () => {
-      await handleGetConfig(mockClient, { org: 'test', repo: 'repo' });
-      expect(mockClient.getConfig).toHaveBeenCalledWith('test', 'repo', undefined);
-    });
-  });
-
-  describe('handleUpdateConfig', () => {
-    it('should normalize configPath with leading slash', async () => {
-      await handleUpdateConfig(mockClient, {
-        org: 'test',
-        repo: 'repo',
-        config: { key: 'value' },
-        configPath: '/custom',
-      });
-      expect(mockClient.updateConfig).toHaveBeenCalledWith('test', 'repo', { key: 'value' }, 'custom');
-    });
-
-    it('should handle undefined configPath', async () => {
-      await handleUpdateConfig(mockClient, {
-        org: 'test',
-        repo: 'repo',
-        config: { key: 'value' },
-      });
-      expect(mockClient.updateConfig).toHaveBeenCalledWith('test', 'repo', { key: 'value' }, undefined);
     });
   });
 

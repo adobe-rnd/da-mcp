@@ -36,9 +36,11 @@ src/
 │   ├── server.ts      # MCP server with JSON-RPC handler, tool registry
 │   ├── tools.ts       # Tool definitions with Zod schemas
 │   └── handlers.ts    # Tool implementation handlers (one per tool)
-└── da-admin/
-    ├── client.ts      # DA Admin API HTTP client with token pass-through
-    └── types.ts       # TypeScript interfaces for API responses
+├── da-admin/
+│   ├── client.ts      # DA Admin API HTTP client with token pass-through
+│   └── types.ts       # TypeScript interfaces for API responses
+└── utils/
+    └── path.ts        # Path utilities (normalization, extension handling)
 ```
 
 ## Key Patterns
@@ -47,6 +49,15 @@ src/
 - **Handler pattern:** Each of the 12 tools has a dedicated handler in `handlers.ts` that calls `DAAdminClient`
 - **FormData for content:** Create/update operations use `FormData` with `Blob` for file content
 - **30-second timeout:** All API requests have AbortController timeout
+
+## Coding Standards
+
+- **TypeScript:** Strict mode with ES2022, bundler module resolution
+- **Linting:** Adobe Helix ESLint config, auto-fix via pre-commit hooks
+- **Naming:** Files: `kebab-case`, Classes: `PascalCase`, Functions: `camelCase`, Tools: `da_snake_case`
+- **Testing:** Vitest with tests mirroring `src/` structure, use mocks for dependencies
+- **Git:** Conventional commits required, semantic release automated on main branch
+- **Exports:** Named exports only (no default exports)
 
 ## Tools
 
@@ -75,5 +86,5 @@ All tools accept `org` and `repo` parameters plus operation-specific params:
 
 ## Public Endpoints
 
-- Direct: `https://da-mcp.franklin-prod.workers.dev/mcp`
+- Direct: `https://da-mcp.adobeaem.workers.dev/mcp`
 - IMS-authenticated: `https://mcp.adobeaemcloud.com/adobe/mcp/da`

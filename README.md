@@ -1,5 +1,7 @@
 # da-mcp
 
+[![85% Vibe_Coded](https://img.shields.io/badge/85%25-Vibe_Coded-ff69b4?style=for-the-badge&logo=semanticrelease&logoColor=white)](https://github.com/trieloff/vibe-coded-badge-action)
+
 A remote Model Context Protocol (MCP) server for Document Authoring (DA). This server provides LLM assistants like Claude or ChatGPT with direct access to DA management operations.
 
 ## Features
@@ -196,7 +198,6 @@ Authorization: YOUR_DA_USER_IMS_TOKEN
 ```
 
 **Note:** If you are accessing the API through the public (authenticated) URL of the API router, IMS (Adobe Identity Management Service) login is automatically handled by the AEM API router. In this case, you do *not* need to provide a DA Admin API token in the `Authorization` header—the IMS login flow will provide authentication for you.
-
 
 ## Usage Examples
 

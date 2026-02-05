@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/adobe-rnd/da-mcp/compare/v1.0.1...v1.0.2) (2026-02-05)
+
+
+### Bug Fixes
+
+* make versionlist tool work ([672485a](https://github.com/adobe-rnd/da-mcp/commit/672485a03b8c8bbaaa74b81213f15bc2818dae98))
+
 ## [1.0.1](https://github.com/adobe-rnd/da-mcp/compare/v1.0.0...v1.0.1) (2026-02-04)
 
 

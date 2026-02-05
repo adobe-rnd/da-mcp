@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/adobe-rnd/da-mcp/compare/v1.0.2...v1.1.0) (2026-02-05)
+
+
+### Features
+
+* remove config management tools ([8a97707](https://github.com/adobe-rnd/da-mcp/commit/8a977075005a3fc54a3573f4b8ce1ae3a8d8341c))
+
 ## [1.0.2](https://github.com/adobe-rnd/da-mcp/compare/v1.0.1...v1.0.2) (2026-02-05)
 
 

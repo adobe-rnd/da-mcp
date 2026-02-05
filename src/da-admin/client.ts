@@ -103,10 +103,8 @@ export class DAAdminClient {
 
       if (contentType?.includes('application/json')) {
         result = await response.json();
-        console.log('DA Admin API Result:', JSON.stringify(result, null, 2));
       } else {
         result = await response.text() as unknown as T;
-        console.log('DA Admin API Result (text):', result);
       }
 
       return result;
@@ -253,7 +251,7 @@ export class DAAdminClient {
     repo: string,
     path: string,
   ): Promise<DAVersionsResponse> {
-    const endpoint = `/versions/${org}/${repo}/${path}`;
+    const endpoint = `/versionlist/${org}/${repo}/${path}`;
     return this.request<DAVersionsResponse>(endpoint);
   }
 

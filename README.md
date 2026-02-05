@@ -148,7 +148,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   "mcpServers": {
     "da-live-admin": {
       "type": "streamable-http",
-      "url": "https://da-mcp.franklin-prod.workers.dev/mcp",
+      "url": "https://da-mcp.adobeaem.workers.dev/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_DA_USER_IMS_TOKEN"
       }
@@ -165,7 +165,7 @@ Add to `.vscode/mcp.json` or Cursor settings:
 {
   "mcpServers": {
     "da-admin-mcp-direct": {
-      "url": "https://da-mcp.franklin-prod.workers.dev/mcp",
+      "url": "https://da-mcp.adobeaem.workers.dev/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_DA_USER_IMS_TOKEN"
       }

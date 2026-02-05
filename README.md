@@ -4,7 +4,7 @@ A remote Model Context Protocol (MCP) server for Document Authoring (DA). This s
 
 ## Features
 
-- **12 DA Admin Tools**: Complete set of tools for managing DA repositories
+- **10 DA Admin Tools**: Complete set of tools for managing DA repositories
 - **Remote Access**: Deployable on Cloudflare Workers with global edge distribution
 - **Streamable HTTP**: Modern MCP transport protocol for remote servers
 - **Token Pass-through**: Simple authentication by passing DA API tokens through Authorization header
@@ -25,7 +25,7 @@ A remote Model Context Protocol (MCP) server for Document Authoring (DA). This s
 │  DA MCP                 │
 │  ┌──────────────────┐   │
 │  │   MCP Server     │   │
-│  │   (12 Tools)     │   │
+│  │   (10 Tools)     │   │
 │  └──────────────────┘   │
 └───────────┬─────────────┘
             │ HTTPS + Token
@@ -62,8 +62,6 @@ src/
 | `da_copy_content` | Copy content between locations |
 | `da_move_content` | Move content between locations |
 | `da_get_versions` | Get version history for a file |
-| `da_get_config` | Get repository configuration |
-| `da_update_config` | Update repository configuration |
 | `da_lookup_media` | Lookup media references |
 | `da_lookup_fragment` | Lookup fragment references |
 

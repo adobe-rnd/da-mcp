@@ -9,7 +9,6 @@ import {
   DAListSourcesResponse,
   DASourceContent,
   DAVersionsResponse,
-  DAConfig,
   DAMediaReference,
   DAOperationResponse,
 } from './types';
@@ -253,34 +252,6 @@ export class DAAdminClient {
   ): Promise<DAVersionsResponse> {
     const endpoint = `/versionlist/${org}/${repo}/${path}`;
     return this.request<DAVersionsResponse>(endpoint);
-  }
-
-  /**
-   * Get configuration
-   */
-  async getConfig(
-    org: string,
-    repo: string,
-    configPath?: string,
-  ): Promise<DAConfig> {
-    const endpoint = `/config/${org}/${repo}${configPath ? `/${configPath}` : ''}`;
-    return this.request<DAConfig>(endpoint);
-  }
-
-  /**
-   * Update configuration
-   */
-  async updateConfig(
-    org: string,
-    repo: string,
-    config: DAConfig,
-    configPath?: string,
-  ): Promise<DAOperationResponse> {
-    const endpoint = `/config/${org}/${repo}${configPath ? `/${configPath}` : ''}`;
-    return this.request<DAOperationResponse>(endpoint, {
-      method: 'PUT',
-      body: JSON.stringify(config),
-    });
   }
 
   /**

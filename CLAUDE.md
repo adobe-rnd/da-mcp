@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DA MCP is a remote Model Context Protocol (MCP) server for Document Authoring (DA). It provides LLM assistants with direct access to DA management operations via Cloudflare Workers with streamable HTTP transport.
 
-**Architecture flow:** MCP Client → Cloudflare Worker (12 tools) → DA Admin API (admin.da.live)
+**Architecture flow:** MCP Client → Cloudflare Worker (10 tools) → DA Admin API (admin.da.live)
 
 ## Development Commands
 
@@ -44,7 +44,7 @@ src/
 ## Key Patterns
 
 - **Token pass-through:** Authorization header extracted in `index.ts`, passed to `DAAdminClient`, forwarded to DA Admin API
-- **Handler pattern:** Each of the 12 tools has a dedicated handler in `handlers.ts` that calls `DAAdminClient`
+- **Handler pattern:** Each of the 10 tools has a dedicated handler in `handlers.ts` that calls `DAAdminClient`
 - **FormData for content:** Create/update operations use `FormData` with `Blob` for file content
 - **30-second timeout:** All API requests have AbortController timeout
 
@@ -62,8 +62,6 @@ All tools accept `org` and `repo` parameters plus operation-specific params:
 | `da_copy_content` | Copy between locations |
 | `da_move_content` | Move between locations |
 | `da_get_versions` | Get version history |
-| `da_get_config` | Get repository config |
-| `da_update_config` | Update repository config |
 | `da_lookup_media` | Get media asset info |
 | `da_lookup_fragment` | Get fragment info |
 

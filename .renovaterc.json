@@ -6,12 +6,6 @@
     {
       "matchPackageNames": ["*"],
       "automerge": false
-    },
-    {
-      "matchPackageNames": [
-        "@aws-sdk/client-s3"
-      ],
-      "allowedVersions": "3.726.1"
     }
   ]
 }

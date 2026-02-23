@@ -1,30 +1,45 @@
-name = "mcp-da-admin"
+name = "da-mcp"
 main = "src/index.ts"
-compatibility_date = "2024-12-01"
+compatibility_date = "2025-11-17"
 compatibility_flags = ["nodejs_compat"]
+
+services = [
+  { binding = "daadmin", service = "da-admin-dev" }
+]
+
+[vars]
+VERSION = "@@VERSION@@-dev"
+ENVIRONMENT = "dev"
 
 # Local development - points to local da-admin
 [env.local]
-name = "mcp-da-admin-local"
+name = "da-mcp-local"
+
 [env.local.vars]
 ENVIRONMENT = "local"
 DA_ADMIN_BASE_URL = "http://localhost:8787"
 
-[env.development]
-name = "mcp-da-admin-dev"
-[env.development.vars]
-ENVIRONMENT = "development"
-DA_ADMIN_BASE_URL = "https://admin.da.live"
+# CI environment
+[env.ci]
+name = "da-mcp-ci"
+services = [
+  { binding = "daadmin", service = "da-admin-stage" }
+]
 
+[env.ci.vars]
+VERSION = "@@VERSION@@-ci"
+ENVIRONMENT = "ci"
+
+# Production environment
 [env.production]
-name = "mcp-da-admin"
-[env.production.vars]
-ENVIRONMENT = "production"
-DA_ADMIN_BASE_URL = "https://admin.da.live"
+name = "da-mcp"
+services = [
+  { binding = "daadmin", service = "da-admin" }
+]
 
-[vars]
-ENVIRONMENT = "development"
-DA_ADMIN_BASE_URL = "https://admin.da.live"
+[env.production.vars]
+VERSION = "@@VERSION@@"
+ENVIRONMENT = "production"
 
 [observability]
 [observability.logs]

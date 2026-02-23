@@ -1,6 +1,6 @@
 /**
  * MCP Tool Definitions
- * Define all available tools for DA Live Admin operations
+ * Define all available tools for da-mcp operations
  */
 
 export const tools = [
@@ -210,56 +210,6 @@ export const tools = [
         },
       },
       required: ['org', 'repo', 'path'],
-    },
-  },
-  {
-    name: 'da_get_config',
-    description:
-      'Get configuration for a DA repository. Can retrieve global or path-specific configurations.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        org: {
-          type: 'string',
-          description: 'Organization name',
-        },
-        repo: {
-          type: 'string',
-          description: 'Repository name',
-        },
-        configPath: {
-          type: 'string',
-          description: 'Optional specific configuration path',
-        },
-      },
-      required: ['org', 'repo'],
-    },
-  },
-  {
-    name: 'da_update_config',
-    description:
-      'Update configuration for a DA repository. Can update global or path-specific configurations.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        org: {
-          type: 'string',
-          description: 'Organization name',
-        },
-        repo: {
-          type: 'string',
-          description: 'Repository name',
-        },
-        config: {
-          type: 'object',
-          description: 'Configuration object to update',
-        },
-        configPath: {
-          type: 'string',
-          description: 'Optional specific configuration path',
-        },
-      },
-      required: ['org', 'repo', 'config'],
     },
   },
   {

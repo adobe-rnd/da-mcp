@@ -1,10 +1,12 @@
-# DA Live Admin - Remote MCP Server
+# da-mcp
+
+[![85% Vibe_Coded](https://img.shields.io/badge/85%25-Vibe_Coded-ff69b4?style=for-the-badge&logo=semanticrelease&logoColor=white)](https://github.com/trieloff/vibe-coded-badge-action)
 
 A remote Model Context Protocol (MCP) server for Document Authoring (DA). This server provides LLM assistants like Claude or ChatGPT with direct access to DA management operations.
 
 ## Features
 
-- **12 DA Admin Tools**: Complete set of tools for managing DA repositories
+- **10 DA Admin Tools**: Complete set of tools for managing DA repositories
 - **Remote Access**: Deployable on Cloudflare Workers with global edge distribution
 - **Streamable HTTP**: Modern MCP transport protocol for remote servers
 - **Token Pass-through**: Simple authentication by passing DA API tokens through Authorization header
@@ -25,7 +27,7 @@ A remote Model Context Protocol (MCP) server for Document Authoring (DA). This s
 │  DA MCP                 │
 │  ┌──────────────────┐   │
 │  │   MCP Server     │   │
-│  │   (12 Tools)     │   │
+│  │   (10 Tools)     │   │
 │  └──────────────────┘   │
 └───────────┬─────────────┘
             │ HTTPS + Token
@@ -62,8 +64,6 @@ src/
 | `da_copy_content` | Copy content between locations |
 | `da_move_content` | Move content between locations |
 | `da_get_versions` | Get version history for a file |
-| `da_get_config` | Get repository configuration |
-| `da_update_config` | Update repository configuration |
 | `da_lookup_media` | Lookup media references |
 | `da_lookup_fragment` | Lookup fragment references |
 
@@ -131,7 +131,7 @@ wrangler deploy --env development
 After deployment, your MCP server is accessible at:
 
 - **Direct MCP Endpoint:**  
-  [`https://mcp-da-admin.franklin-prod.workers.dev/mcp`](https://mcp-da-admin.franklin-prod.workers.dev/mcp)
+  [`https://da-mcp.franklin-prod.workers.dev/mcp`](https://da-mcp.franklin-prod.workers.dev/mcp)
 
 - **IMS-Authenticated via AEM API Router:**  
   [`https://mcp.adobeaemcloud.com/adobe/mcp/da`](https://mcp.adobeaemcloud.com/adobe/mcp/da)  
@@ -148,7 +148,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   "mcpServers": {
     "da-live-admin": {
       "type": "streamable-http",
-      "url": "https://mcp-da-admin.franklin-prod.workers.dev/mcp",
+      "url": "https://da-mcp.adobeaem.workers.dev/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_DA_USER_IMS_TOKEN"
       }
@@ -165,7 +165,7 @@ Add to `.vscode/mcp.json` or Cursor settings:
 {
   "mcpServers": {
     "da-admin-mcp-direct": {
-      "url": "https://mcp-da-admin.franklin-prod.workers.dev/mcp",
+      "url": "https://da-mcp.adobeaem.workers.dev/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_DA_USER_IMS_TOKEN"
       }
@@ -199,7 +199,6 @@ Authorization: YOUR_DA_USER_IMS_TOKEN
 
 **Note:** If you are accessing the API through the public (authenticated) URL of the API router, IMS (Adobe Identity Management Service) login is automatically handled by the AEM API router. In this case, you do *not* need to provide a DA Admin API token in the `Authorization` header—the IMS login flow will provide authentication for you.
 
-
 ## Usage Examples
 
 Once configured, you can ask your AI assistant to perform DA operations:
@@ -226,7 +225,7 @@ Health check endpoint returning server status.
 ```json
 {
   "status": "healthy",
-  "service": "mcp-da-admin",
+  "service": "da-mcp",
   "version": "1.0.0",
   "environment": "production",
   "timestamp": "2025-01-07T12:00:00.000Z"

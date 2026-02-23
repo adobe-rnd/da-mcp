@@ -1,14 +1,14 @@
 /**
  * Cloudflare Worker Entry Point
- * Main handler for the DA Live Admin MCP Server
+ * Main handler for the da-mcp Server
  */
 
 import { createMCPServer } from './mcp/server';
 
 export interface Env {
   ENVIRONMENT?: string;
-  DA_ADMIN_BASE_URL?: string;
   DA_ADMIN_API_TOKEN?: string; // Optional fallback token for testing
+  daadmin: Fetcher; // Service binding to DA Admin worker
 }
 
 /**
@@ -64,7 +64,7 @@ function errorResponse(message: string, status: number = 500): Response {
         'Content-Type': 'application/json',
         ...CORS_HEADERS,
       },
-    }
+    },
   );
 }
 
@@ -80,7 +80,7 @@ function successResponse(data: any, status: number = 200): Response {
         'Content-Type': 'application/json',
         ...CORS_HEADERS,
       },
-    }
+    },
   );
 }
 
@@ -90,7 +90,7 @@ function successResponse(data: any, status: number = 200): Response {
 function handleHealthCheck(env: Env): Response {
   return successResponse({
     status: 'healthy',
-    service: 'mcp-da-admin',
+    service: 'da-mcp',
     version: '1.0.0',
     environment: env.ENVIRONMENT || 'development',
     timestamp: new Date().toISOString(),
@@ -127,16 +127,11 @@ async function handleMCP(request: Request, env: Env): Promise<Response> {
     const jsonrpcRequest = await request.json();
     console.log('JSON-RPC Request:', JSON.stringify(jsonrpcRequest, null, 2));
 
-    // Create MCP server with the user's DA API token
-    const server = createMCPServer(apiToken, env.DA_ADMIN_BASE_URL);
-
-    // Process the request through MCP server
+    // Create MCP server with the user's DA API token and service binding
+    const server = createMCPServer(env.daadmin, apiToken);
     const response = await server.handleRequest(jsonrpcRequest);
-
-    console.log('JSON-RPC Response:', JSON.stringify(response, null, 2));
     console.log('=== MCP Request Completed ===\n');
 
-    // Return JSON-RPC response
     return successResponse(response);
   } catch (error) {
     console.error('MCP handler error:', error);

@@ -14,10 +14,9 @@ import {
   handleCopyContent,
   handleMoveContent,
   handleGetVersions,
-  handleGetConfig,
-  handleUpdateConfig,
   handleLookupMedia,
   handleUploadMedia,
+  handleLookupFragment,
 } from './handlers';
 
 /**
@@ -26,10 +25,10 @@ import {
 export class MCPServer {
   private client: DAAdminClient;
 
-  constructor(apiToken: string, baseUrl?: string) {
+  constructor(daadminService: Fetcher, apiToken: string) {
     this.client = new DAAdminClient({
       apiToken,
-      baseUrl: baseUrl || 'https://admin.da.live',
+      daadminService,
     });
   }
 
@@ -135,17 +134,14 @@ export class MCPServer {
       case 'da_get_versions':
         return handleGetVersions(this.client, args);
 
-      case 'da_get_config':
-        return handleGetConfig(this.client, args);
-
-      case 'da_update_config':
-        return handleUpdateConfig(this.client, args);
-
       case 'da_lookup_media':
         return handleLookupMedia(this.client, args);
 
       case 'da_upload_media':
         return handleUploadMedia(this.client, args);
+
+      case 'da_lookup_fragment':
+        return handleLookupFragment(this.client, args);
 
       default:
         return {
@@ -164,6 +160,6 @@ export class MCPServer {
 /**
  * Create and configure MCP server
  */
-export function createMCPServer(apiToken: string, baseUrl?: string): MCPServer {
-  return new MCPServer(apiToken, baseUrl);
+export function createMCPServer(daadminService: Fetcher, apiToken: string): MCPServer {
+  return new MCPServer(daadminService, apiToken);
 }

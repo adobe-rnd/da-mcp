@@ -293,14 +293,14 @@ export class DAAdminClient {
     path: string,
     base64Data: string,
     mimeType: string,
-    fileName: string
+    fileName: string,
   ): Promise<DAOperationResponse> {
     const endpoint = `/source/${org}/${repo}/${path}`;
 
     // Decode base64 to binary
     const binaryString = atob(base64Data);
     const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
+    for (let i = 0; i < binaryString.length; i += 1) {
       bytes[i] = binaryString.charCodeAt(i);
     }
 

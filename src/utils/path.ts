@@ -1,8 +1,9 @@
 /**
  * Normalizes path parameters to prevent double slashes in API URLs.
  *
- * - Removes leading slash (prevents `/source/org/repo//path`)
- * - Removes trailing slash (for consistency)
+ * - Trims whitespace
+ * - Removes all leading slashes (prevents `/source/org/repo//path`)
+ * - Removes all trailing slashes (for consistency)
  * - Preserves empty string (for root path)
  * - Preserves undefined (for optional parameters)
  *
@@ -20,23 +21,24 @@
  */
 export function normalizePath(path: string | undefined): string | undefined {
   if (path === undefined) return undefined;
-  if (path === '') return '';
+  const trimmed = path.trim();
+  if (trimmed === '') return '';
 
-  let normalized = path;
-  if (normalized.startsWith('/')) normalized = normalized.slice(1);
-  if (normalized.endsWith('/')) normalized = normalized.slice(0, -1);
-
-  return normalized;
+  return trimmed.replace(/^\/+|\/+$/g, '');
 }
 
 /**
- * Ensures a path has the .html extension for DA source operations.
- * Adds .html if no extension present, preserves existing extensions.
+ * Normalizes a page path and ensures it has a .html extension for DA source operations.
+ * Adds .html if the basename has no extension, preserves existing extensions.
  */
-export function ensureHtmlExtension(path: string | undefined): string | undefined {
-  if (path === undefined) return undefined;
-  if (path === '') return '';
+export function normalizePagePath(path: string | undefined): string | undefined {
+  const normalized = normalizePath(path);
+  if (normalized === undefined) return undefined;
+  if (normalized === '') return '';
 
-  const filename = path.split('/').pop() || '';
-  return filename.includes('.') ? path : `${path}.html`;
+  const filename = normalized.split('/').pop() || '';
+  const lastDot = filename.lastIndexOf('.');
+  const hasExtension = lastDot > 0;
+
+  return hasExtension ? normalized : `${normalized}.html`;
 }

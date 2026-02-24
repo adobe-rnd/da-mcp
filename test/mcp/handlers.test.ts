@@ -31,7 +31,7 @@ describe('Handler path normalization', () => {
       copyContent: vi.fn().mockResolvedValue({ success: true }),
       moveContent: vi.fn().mockResolvedValue({ success: true }),
       getVersions: vi.fn().mockResolvedValue({ versions: [] }),
-      lookupMedia: vi.fn().mockResolvedValue({ url: '' }),
+      lookupMedia: vi.fn().mockResolvedValue({ data: 'base64imagedata', mimeType: 'image/png' }),
       lookupFragment: vi.fn().mockResolvedValue({ url: '' }),
       uploadMedia: vi.fn().mockResolvedValue({ success: true }),
     };
@@ -222,6 +222,20 @@ describe('Handler path normalization', () => {
     it('should normalize mediaPath with leading slash', async () => {
       await handleLookupMedia(mockClient, { org: 'test', repo: 'repo', mediaPath: '/media/image.png' });
       expect(mockClient.lookupMedia).toHaveBeenCalledWith('test', 'repo', 'media/image.png');
+    });
+
+    it('should return image content type for image responses', async () => {
+      mockClient.lookupMedia.mockResolvedValue({ data: 'abc123', mimeType: 'image/jpeg' });
+      const result = await handleLookupMedia(mockClient, { org: 'test', repo: 'repo', mediaPath: 'media/photo.jpg' });
+      expect(result.content[0].type).toBe('image');
+      expect(result.content[0].data).toBe('abc123');
+      expect(result.content[0].mimeType).toBe('image/jpeg');
+    });
+
+    it('should return text content type for non-image responses', async () => {
+      mockClient.lookupMedia.mockResolvedValue({ data: 'abc123', mimeType: 'application/pdf' });
+      const result = await handleLookupMedia(mockClient, { org: 'test', repo: 'repo', mediaPath: 'docs/file.pdf' });
+      expect(result.content[0].type).toBe('text');
     });
   });
 

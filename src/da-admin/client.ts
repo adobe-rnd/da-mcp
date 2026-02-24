@@ -9,6 +9,7 @@ import {
   DAListSourcesResponse,
   DASourceContent,
   DAVersionsResponse,
+  DAMediaContent,
   DAMediaReference,
   DAOperationResponse,
 } from './types';
@@ -27,32 +28,32 @@ export class DAAdminClient {
   }
 
   /**
-   * Make an authenticated request to the DA Admin API via service binding
+   * Make an authenticated request to the DA Admin API via service binding.
+   * Pass `binary: true` to receive raw response bytes as base64 with MIME type.
    */
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {},
+    options: RequestInit & { binary?: boolean } = {},
   ): Promise<T> {
-    const method = options.method || 'GET';
+    const { binary, ...requestOptions } = options;
+    const method = requestOptions.method || 'GET';
 
-    console.log('DA Admin API Call (via service binding):');
-    console.log('  Method:', method);
-    console.log('  Endpoint:', endpoint);
+    console.log(`DA Admin API Call: Method: ${method} Endpoint: ${endpoint}`);
 
-    const headers = new Headers(options.headers || {});
+    const headers = new Headers(requestOptions.headers || {});
     headers.set('Authorization', `Bearer ${this.apiToken}`);
 
-    // Only set Content-Type for JSON, not for FormData
-    const isFormData = options.body instanceof FormData;
-    if (!isFormData) {
+    // Only set Content-Type for non-FormData, non-binary requests
+    const isFormData = requestOptions.body instanceof FormData;
+    if (!binary && !isFormData) {
       headers.set('Content-Type', 'application/json');
     }
 
-    if (options.body) {
+    if (requestOptions.body) {
       if (isFormData) {
         console.log('  Body: FormData (multipart/form-data)');
       } else {
-        console.log('  Body:', options.body);
+        console.log('  Body:', requestOptions.body);
       }
     }
 
@@ -62,11 +63,9 @@ export class DAAdminClient {
     const startTime = Date.now();
 
     try {
-      // Create a Request object for the service binding
       const request = new Request(`https://daadmin${endpoint}`, {
-        method,
+        ...requestOptions,
         headers,
-        body: options.body,
         signal: controller.signal,
       });
 
@@ -96,10 +95,20 @@ export class DAAdminClient {
         throw error;
       }
 
-      // Handle empty responses
       const contentType = response.headers.get('content-type');
-      let result: T;
 
+      if (binary) {
+        const mimeType = (contentType || 'application/octet-stream').split(';')[0].trim();
+        const arrayBuffer = await response.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        let binaryStr = '';
+        for (let i = 0; i < bytes.length; i += 1) {
+          binaryStr += String.fromCharCode(bytes[i]);
+        }
+        return { data: btoa(binaryStr), mimeType } as unknown as T;
+      }
+
+      let result: T;
       if (contentType?.includes('application/json')) {
         result = await response.json();
       } else {
@@ -255,15 +264,15 @@ export class DAAdminClient {
   }
 
   /**
-   * Lookup media references
+   * Lookup media — returns binary content as base64 with MIME type
    */
   async lookupMedia(
     org: string,
     repo: string,
     mediaPath: string,
-  ): Promise<DAMediaReference> {
-    const endpoint = `/media/${org}/${repo}/${mediaPath}`;
-    return this.request<DAMediaReference>(endpoint);
+  ): Promise<DAMediaContent> {
+    const endpoint = `/source/${org}/${repo}/${mediaPath}`;
+    return this.request<DAMediaContent>(endpoint, { binary: true });
   }
 
   /**

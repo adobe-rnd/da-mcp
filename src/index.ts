@@ -7,6 +7,7 @@ import { createMCPServer } from './mcp/server';
 
 export interface Env {
   ENVIRONMENT?: string;
+  VERSION?: string;
   DA_ADMIN_API_TOKEN?: string; // Optional fallback token for testing
   daadmin: Fetcher; // Service binding to DA Admin worker
 }
@@ -91,7 +92,7 @@ function handleHealthCheck(env: Env): Response {
   return successResponse({
     status: 'healthy',
     service: 'da-mcp',
-    version: '1.0.0',
+    version: env.VERSION,
     environment: env.ENVIRONMENT || 'development',
     timestamp: new Date().toISOString(),
   });
@@ -103,7 +104,6 @@ function handleHealthCheck(env: Env): Response {
 async function handleMCP(request: Request, env: Env): Promise<Response> {
   console.log('=== MCP Request Received ===');
   console.log('Timestamp:', new Date().toISOString());
-  console.log('Method:', request.method);
   console.log('URL:', request.url);
 
   // Extract and validate API token

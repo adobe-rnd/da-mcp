@@ -48,6 +48,11 @@ export interface DAMediaReference {
   height?: number;
 }
 
+export interface DAMediaContent {
+  data: string; // base64-encoded binary data
+  mimeType: string;
+}
+
 export interface DAFragmentReference {
   path: string;
   fragment: string;

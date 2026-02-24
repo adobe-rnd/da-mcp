@@ -12,6 +12,7 @@ import {
   handleGetVersions,
   handleLookupMedia,
   handleLookupFragment,
+  handleUploadMedia,
 } from '../../src/mcp/handlers';
 
 // Mock the DA Admin Client
@@ -32,6 +33,7 @@ describe('Handler path normalization', () => {
       getVersions: vi.fn().mockResolvedValue({ versions: [] }),
       lookupMedia: vi.fn().mockResolvedValue({ url: '' }),
       lookupFragment: vi.fn().mockResolvedValue({ url: '' }),
+      uploadMedia: vi.fn().mockResolvedValue({ success: true }),
     };
   });
 
@@ -227,6 +229,28 @@ describe('Handler path normalization', () => {
     it('should normalize fragmentPath with leading slash', async () => {
       await handleLookupFragment(mockClient, { org: 'test', repo: 'repo', fragmentPath: '/fragments/footer' });
       expect(mockClient.lookupFragment).toHaveBeenCalledWith('test', 'repo', 'fragments/footer');
+    });
+  });
+
+  describe('handleUploadMedia', () => {
+    it('should strip data URL prefix before uploading', async () => {
+      await handleUploadMedia(mockClient, {
+        org: 'test',
+        repo: 'repo',
+        path: 'media/image.png',
+        base64Data: 'data:image/png;base64,Zm9v',
+        mimeType: 'image/png',
+        fileName: 'image.png',
+      });
+
+      expect(mockClient.uploadMedia).toHaveBeenCalledWith(
+        'test',
+        'repo',
+        'media/image.png',
+        'Zm9v',
+        'image/png',
+        'image.png',
+      );
     });
   });
 });

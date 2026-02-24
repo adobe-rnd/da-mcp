@@ -261,7 +261,7 @@ export const tools = [
   {
     name: 'da_upload_media',
     description:
-      'Upload an image or media file to a DA repository. Use attachmentId to reference an attached file (server injects the data), OR provide base64Data directly.',
+      'Upload an image or media file to a DA repository using base64-encoded data.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -277,24 +277,20 @@ export const tools = [
           type: 'string',
           description: 'Destination path for the media file (e.g., "media/my-image.png")',
         },
-        attachmentId: {
-          type: 'string',
-          description: 'Reference to an attached file (e.g., "attachment_1"). Server will inject the actual data.',
-        },
         base64Data: {
           type: 'string',
-          description: 'Base64-encoded file content (optional if attachmentId is provided)',
+          description: 'Base64-encoded file content',
         },
         mimeType: {
           type: 'string',
-          description: 'MIME type of the file (optional if attachmentId is provided)',
+          description: 'MIME type of the file',
         },
         fileName: {
           type: 'string',
-          description: 'Original filename (optional if attachmentId is provided)',
+          description: 'Original filename',
         },
       },
-      required: ['org', 'repo', 'path'],
+      required: ['org', 'repo', 'path', 'base64Data', 'mimeType', 'fileName'],
     },
   },
 ];

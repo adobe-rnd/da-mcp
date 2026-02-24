@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/adobe-rnd/da-mcp/compare/v1.1.0...v1.2.0) (2026-02-24)
+
+
+### Features
+
+* Add da_upload_media tool and path normalization for .html files ([2aa4e07](https://github.com/adobe-rnd/da-mcp/commit/2aa4e07627cba2cdd7ae63c433e01bed295e0737))
+* add local development environment configuration ([df5262f](https://github.com/adobe-rnd/da-mcp/commit/df5262f0ecaccc935c746abb1e843e9879952e24))
+
 # [1.1.0](https://github.com/adobe-rnd/da-mcp/compare/v1.0.2...v1.1.0) (2026-02-05)
 
 

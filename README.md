@@ -131,7 +131,7 @@ wrangler deploy --env development
 After deployment, your MCP server is accessible at:
 
 - **Direct MCP Endpoint:**  
-  [`https://da-mcp.franklin-prod.workers.dev/mcp`](https://da-mcp.franklin-prod.workers.dev/mcp)
+  [`https://da-mcp.adobeaem.workers.dev/mcp`](https://da-mcp.adobeaem.workers.dev/mcp)
 
 - **IMS-Authenticated via AEM API Router:**  
   [`https://mcp.adobeaemcloud.com/adobe/mcp/da`](https://mcp.adobeaemcloud.com/adobe/mcp/da)  

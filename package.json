@@ -10,7 +10,9 @@
   },
   "scripts": {
     "dev": "wrangler dev",
+    "dev:local": "wrangler dev --env local --port 3008",
     "deploy": "wrangler deploy",
+    "deploy:dev": "wrangler deploy --env development",
     "deploy:ci": "node prepare-deploy.js && wrangler deploy -e ci -c wrangler-versioned.toml",
     "deploy:production": "node prepare-deploy.js && wrangler deploy -e production -c wrangler-versioned.toml",
     "lint": "eslint .",

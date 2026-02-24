@@ -15,6 +15,7 @@ import {
   handleMoveContent,
   handleGetVersions,
   handleLookupMedia,
+  handleUploadMedia,
   handleLookupFragment,
 } from './handlers';
 
@@ -135,6 +136,9 @@ export class MCPServer {
 
       case 'da_lookup_media':
         return handleLookupMedia(this.client, args);
+
+      case 'da_upload_media':
+        return handleUploadMedia(this.client, args);
 
       case 'da_lookup_fragment':
         return handleLookupFragment(this.client, args);

@@ -11,6 +11,14 @@ services = [
 VERSION = "@@VERSION@@-dev"
 ENVIRONMENT = "dev"
 
+# Local development - points to local da-admin
+[env.local]
+name = "da-mcp-local"
+
+[env.local.vars]
+ENVIRONMENT = "local"
+DA_ADMIN_BASE_URL = "http://localhost:8787"
+
 # CI environment
 [env.ci]
 name = "da-mcp-ci"

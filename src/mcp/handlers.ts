@@ -307,6 +307,19 @@ export async function handleLookupMedia(
   try {
     const normalizedMediaPath = normalizePath(args.mediaPath)!;
     const response = await client.lookupMedia(args.org, args.repo, normalizedMediaPath);
+
+    if (response.mimeType.startsWith('image/')) {
+      return {
+        content: [
+          {
+            type: 'image',
+            data: response.data,
+            mimeType: response.mimeType,
+          },
+        ],
+      };
+    }
+
     return {
       content: [
         {

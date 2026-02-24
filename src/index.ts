@@ -103,7 +103,6 @@ function handleHealthCheck(env: Env): Response {
 async function handleMCP(request: Request, env: Env): Promise<Response> {
   console.log('=== MCP Request Received ===');
   console.log('Timestamp:', new Date().toISOString());
-  console.log('Method:', request.method);
   console.log('URL:', request.url);
 
   // Extract and validate API token

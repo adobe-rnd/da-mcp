@@ -1,3 +1,11 @@
+## [1.2.1](https://github.com/adobe-rnd/da-mcp/compare/v1.2.0...v1.2.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* display version ([c12fe04](https://github.com/adobe-rnd/da-mcp/commit/c12fe040de263708f3aa945468c967f695e53c69))
+* fix the media lookup ([1a8decb](https://github.com/adobe-rnd/da-mcp/commit/1a8decbb3a0c4f2c6c60e14775786f04bd4a0089))
+
 # [1.2.0](https://github.com/adobe-rnd/da-mcp/compare/v1.1.0...v1.2.0) (2026-02-24)
 
 

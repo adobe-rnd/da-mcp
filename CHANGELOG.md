@@ -1,3 +1,11 @@
+## [1.2.2](https://github.com/adobe-rnd/da-mcp/compare/v1.2.1...v1.2.2) (2026-02-25)
+
+
+### Bug Fixes
+
+* improve upload tool description. ([40ec128](https://github.com/adobe-rnd/da-mcp/commit/40ec1284fee633f7d6140e7f343a9c8e6bd55c4c))
+* version info ([7b15f67](https://github.com/adobe-rnd/da-mcp/commit/7b15f67ea4f85cc769dfdd1b540d3de15a43df58))
+
 ## [1.2.1](https://github.com/adobe-rnd/da-mcp/compare/v1.2.0...v1.2.1) (2026-02-24)
 
 

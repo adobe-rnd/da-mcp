@@ -24,8 +24,8 @@ import {
 /**
  * Create and configure MCP server with all DA tools registered
  */
-export function createServer(client: DAAdminClient): McpServer {
-  const server = new McpServer({ name: 'da-live-admin', version: '@@VERSION@@' });
+export function createServer(client: DAAdminClient, version: string): McpServer {
+  const server = new McpServer({ name: 'da-live-admin', version });
 
   server.registerTool('da_list_sources', {
     description: 'List all sources and directories in a DA repository at a given path. Returns a list of files and folders with their metadata.',
@@ -124,14 +124,23 @@ export function createServer(client: DAAdminClient): McpServer {
   }, (args) => handleLookupFragment(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_upload_media', {
-    description: 'Upload an image or media file to a DA repository using base64-encoded data.',
+    description: 'Upload an image or media file to a DA repository using base64-encoded data. '
+      + 'When uploading images referenced in a page (e.g. during page creation or update), '
+      + 'place the image in a child folder named after the page, sibling to the page file '
+      + '(e.g. page at "docs/my-page.html" → image at "docs/.my-page/image.png" with the folder name with a leading dot). '
+      + 'For standalone media uploads unrelated to a specific page, use the "media" folder '
+      + '(e.g. "media/image.png").',
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
       repo: z.string().describe('Repository name'),
-      path: z.string().describe('Destination path for the media file (e.g., "media/my-image.png")'),
+      path: z.string().describe(
+        'Destination path for the media file. '
+        + 'For page-related images use a dot-prefixed folder named after the page: "docs/.my-page/image.png". '
+        + 'For standalone uploads use the media folder: "media/image.png".',
+      ),
       base64Data: z.string().describe('Base64-encoded file content'),
-      mimeType: z.string().describe('MIME type of the file'),
-      fileName: z.string().describe('Original filename'),
+      mimeType: z.string().describe('MIME type of the file (e.g., "image/png", "image/jpeg")'),
+      fileName: z.string().describe('Original filename including extension (e.g., "photo.jpg")'),
     }),
   }, (args) => handleUploadMedia(client, args) as Promise<CallToolResult>);
 

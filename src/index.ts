@@ -88,7 +88,7 @@ export default {
 
     // Create fresh client + server per request to prevent cross-client data leaks
     const client = new DAAdminClient({ apiToken: token, daadminService: env.daadmin });
-    const server = createServer(client);
+    const server = createServer(client, env.VERSION ?? 'unknown');
 
     // Stateless transport — new instance per request for Cloudflare Workers
     const transport = new WebStandardStreamableHTTPServerTransport({

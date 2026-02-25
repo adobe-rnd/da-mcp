@@ -24,8 +24,8 @@ import {
 /**
  * Create and configure MCP server with all DA tools registered
  */
-export function createServer(client: DAAdminClient): McpServer {
-  const server = new McpServer({ name: 'da-live-admin', version: '@@VERSION@@' });
+export function createServer(client: DAAdminClient, version: string): McpServer {
+  const server = new McpServer({ name: 'da-live-admin', version });
 
   server.registerTool('da_list_sources', {
     description: 'List all sources and directories in a DA repository at a given path. Returns a list of files and folders with their metadata.',
@@ -135,7 +135,7 @@ export function createServer(client: DAAdminClient): McpServer {
       repo: z.string().describe('Repository name'),
       path: z.string().describe(
         'Destination path for the media file. '
-        + 'For page-related images use a folder named after the page: "docs/my-page/image.png". '
+        + 'For page-related images use a dot-prefixed folder named after the page: "docs/.my-page/image.png". '
         + 'For standalone uploads use the media folder: "media/image.png".',
       ),
       base64Data: z.string().describe('Base64-encoded file content'),

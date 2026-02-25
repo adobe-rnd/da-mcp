@@ -79,5 +79,5 @@ All tools accept `org` and `repo` parameters plus operation-specific params:
 
 ## Public Endpoints
 
-- Direct: `https://da-mcp.franklin-prod.workers.dev/mcp`
+- Direct: `https://da-mcp.adobeaem.workers.dev/mcp`
 - IMS-authenticated: `https://mcp.adobeaemcloud.com/adobe/mcp/da`

@@ -189,10 +189,10 @@ describe('Handler path normalization', () => {
       await handleMoveContent(mockClient, {
         org: 'test',
         repo: 'repo',
-        sourcePath: '/old.md',
-        destinationPath: '/new.md',
+        sourcePath: '/old.html',
+        destinationPath: '/new.html',
       });
-      expect(mockClient.moveContent).toHaveBeenCalledWith('test', 'repo', 'old.md', 'new.md');
+      expect(mockClient.moveContent).toHaveBeenCalledWith('test', 'repo', 'old.html', 'new.html');
     });
 
     it('should add .html extension to paths without extensions', async () => {

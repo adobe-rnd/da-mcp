@@ -409,7 +409,6 @@ export async function handleUploadMedia(
         {
           type: 'text',
           text: JSON.stringify({
-            success: true,
             message: `Media uploaded successfully to ${args.path}`,
             path: args.path,
             fileName: args.fileName,

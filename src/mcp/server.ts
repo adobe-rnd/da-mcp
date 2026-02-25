@@ -3,8 +3,10 @@
  * Initialize and configure the MCP server with all tools
  */
 
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { z } from 'zod';
 import { DAAdminClient } from '../da-admin/client';
-import { tools } from './tools';
 import {
   handleListSources,
   handleGetSource,
@@ -20,146 +22,118 @@ import {
 } from './handlers';
 
 /**
- * MCP Server class for handling JSON-RPC requests
+ * Create and configure MCP server with all DA tools registered
  */
-export class MCPServer {
-  private client: DAAdminClient;
+export function createServer(client: DAAdminClient): McpServer {
+  const server = new McpServer({ name: 'da-live-admin', version: '@@VERSION@@' });
 
-  constructor(daadminService: Fetcher, apiToken: string) {
-    this.client = new DAAdminClient({
-      apiToken,
-      daadminService,
-    });
-  }
+  server.registerTool('da_list_sources', {
+    description: 'List all sources and directories in a DA repository at a given path. Returns a list of files and folders with their metadata.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name (e.g., "adobe")'),
+      repo: z.string().describe('Repository name (e.g., "my-docs")'),
+      path: z.string().optional().describe('Optional path within repository (e.g., "docs/guides"). Leave empty for root.'),
+    }),
+  }, (args) => handleListSources(client, args) as Promise<CallToolResult>);
 
-  /**
-   * Handle a JSON-RPC request
-   */
-  async handleRequest(request: any): Promise<any> {
-    const { method, params, id } = request;
+  server.registerTool('da_get_source', {
+    description: 'Get the content of a specific source file from a DA repository. Returns the file content and metadata.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Repository name'),
+      path: z.string().describe('Path to the file within the repository (e.g., "docs/index.md")'),
+    }),
+  }, (args) => handleGetSource(client, args) as Promise<CallToolResult>);
 
-    console.log('MCP Server: Processing method:', method);
-    if (params) {
-      console.log('MCP Server: Method params:', JSON.stringify(params, null, 2));
-    }
+  server.registerTool('da_create_source', {
+    description: 'Create a new source file in a DA repository with the specified content.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Repository name'),
+      path: z.string().describe('Path where the new file should be created (e.g., "docs/new-page.md")'),
+      content: z.string().describe('Content of the new file'),
+      contentType: z.string().optional().describe('Optional content type (e.g., "text/markdown", "text/html")'),
+    }),
+  }, (args) => handleCreateSource(client, args) as Promise<CallToolResult>);
 
-    try {
-      let result: any;
+  server.registerTool('da_update_source', {
+    description: 'Update an existing source file in a DA repository with new content.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Repository name'),
+      path: z.string().describe('Path to the file to update'),
+      content: z.string().describe('New content for the file'),
+      contentType: z.string().optional().describe('Optional content type'),
+    }),
+  }, (args) => handleUpdateSource(client, args) as Promise<CallToolResult>);
 
-      switch (method) {
-        case 'tools/list':
-          console.log('MCP Server: Returning list of', tools.length, 'tools');
-          result = { tools };
-          break;
+  server.registerTool('da_delete_source', {
+    description: 'Delete a source file from a DA repository. Use with caution as this operation cannot be undone.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Repository name'),
+      path: z.string().describe('Path to the file to delete'),
+    }),
+  }, (args) => handleDeleteSource(client, args) as Promise<CallToolResult>);
 
-        case 'tools/call':
-          console.log('MCP Server: Executing tool:', params?.name);
-          result = await this.handleToolCall(params);
-          console.log('MCP Server: Tool execution completed');
-          break;
+  server.registerTool('da_copy_content', {
+    description: 'Copy content from one location to another within a DA repository. Creates a duplicate of the source at the destination.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Repository name'),
+      sourcePath: z.string().describe('Path to the source file to copy from'),
+      destinationPath: z.string().describe('Path where the file should be copied to'),
+    }),
+  }, (args) => handleCopyContent(client, args) as Promise<CallToolResult>);
 
-        case 'initialize':
-          console.log('MCP Server: Initializing connection');
-          result = {
-            protocolVersion: '2024-11-05',
-            capabilities: {
-              tools: {},
-            },
-            serverInfo: {
-              name: 'da-live-admin',
-              version: '1.0.0',
-            },
-          };
-          break;
+  server.registerTool('da_move_content', {
+    description: 'Move content from one location to another within a DA repository. The source file will be removed.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Repository name'),
+      sourcePath: z.string().describe('Path to the source file to move from'),
+      destinationPath: z.string().describe('Path where the file should be moved to'),
+    }),
+  }, (args) => handleMoveContent(client, args) as Promise<CallToolResult>);
 
-        default:
-          console.log('MCP Server: Unknown method:', method);
-          return {
-            jsonrpc: '2.0',
-            id,
-            error: {
-              code: -32601,
-              message: `Method not found: ${method}`,
-            },
-          };
-      }
+  server.registerTool('da_get_versions', {
+    description: 'Get version history for a source file in a DA repository. Returns a list of versions with timestamps and metadata.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Repository name'),
+      path: z.string().describe('Path to the file'),
+    }),
+  }, (args) => handleGetVersions(client, args) as Promise<CallToolResult>);
 
-      console.log('MCP Server: Request handled successfully');
-      return {
-        jsonrpc: '2.0',
-        id,
-        result,
-      };
-    } catch (error) {
-      console.error('MCP Server: Error handling request:', error);
-      return {
-        jsonrpc: '2.0',
-        id,
-        error: {
-          code: -32603,
-          message: error instanceof Error ? error.message : 'Internal error',
-        },
-      };
-    }
-  }
+  server.registerTool('da_lookup_media', {
+    description: 'Lookup media references in a DA repository. Returns information about media assets including URLs and metadata.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Repository name'),
+      mediaPath: z.string().describe('Path to the media file'),
+    }),
+  }, (args) => handleLookupMedia(client, args) as Promise<CallToolResult>);
 
-  /**
-   * Handle tool execution
-   */
-  private async handleToolCall(params: any): Promise<any> {
-    const { name, arguments: args } = params;
+  server.registerTool('da_lookup_fragment', {
+    description: 'Lookup fragment references in a DA repository. Returns information about content fragments.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Repository name'),
+      fragmentPath: z.string().describe('Path to the fragment'),
+    }),
+  }, (args) => handleLookupFragment(client, args) as Promise<CallToolResult>);
 
-    switch (name) {
-      case 'da_list_sources':
-        return handleListSources(this.client, args);
+  server.registerTool('da_upload_media', {
+    description: 'Upload an image or media file to a DA repository using base64-encoded data.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Repository name'),
+      path: z.string().describe('Destination path for the media file (e.g., "media/my-image.png")'),
+      base64Data: z.string().describe('Base64-encoded file content'),
+      mimeType: z.string().describe('MIME type of the file'),
+      fileName: z.string().describe('Original filename'),
+    }),
+  }, (args) => handleUploadMedia(client, args) as Promise<CallToolResult>);
 
-      case 'da_get_source':
-        return handleGetSource(this.client, args);
-
-      case 'da_create_source':
-        return handleCreateSource(this.client, args);
-
-      case 'da_update_source':
-        return handleUpdateSource(this.client, args);
-
-      case 'da_delete_source':
-        return handleDeleteSource(this.client, args);
-
-      case 'da_copy_content':
-        return handleCopyContent(this.client, args);
-
-      case 'da_move_content':
-        return handleMoveContent(this.client, args);
-
-      case 'da_get_versions':
-        return handleGetVersions(this.client, args);
-
-      case 'da_lookup_media':
-        return handleLookupMedia(this.client, args);
-
-      case 'da_upload_media':
-        return handleUploadMedia(this.client, args);
-
-      case 'da_lookup_fragment':
-        return handleLookupFragment(this.client, args);
-
-      default:
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Unknown tool: ${name}`,
-            },
-          ],
-          isError: true,
-        };
-    }
-  }
-}
-
-/**
- * Create and configure MCP server
- */
-export function createMCPServer(daadminService: Fetcher, apiToken: string): MCPServer {
-  return new MCPServer(daadminService, apiToken);
+  return server;
 }

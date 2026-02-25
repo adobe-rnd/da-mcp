@@ -108,14 +108,15 @@ export class DAAdminClient {
         return { data: btoa(binaryStr), mimeType } as unknown as T;
       }
 
-      let result: T;
-      if (contentType?.includes('application/json')) {
-        result = await response.json();
-      } else {
-        result = await response.text() as unknown as T;
+      const body = await response.text();
+      if (!body) {
+        return {} as unknown as T;
       }
 
-      return result;
+      if (contentType?.includes('application/json')) {
+        return JSON.parse(body) as T;
+      }
+      return body as unknown as T;
     } catch (error) {
       clearTimeout(timeoutId);
 
@@ -228,10 +229,12 @@ export class DAAdminClient {
     sourcePath: string,
     destinationPath: string,
   ): Promise<DAOperationResponse> {
-    const endpoint = `/copy/${org}/${repo}`;
+    const endpoint = `/copy/${org}/${repo}/${sourcePath}`;
+    const formData = new FormData();
+    formData.append('destination', `/${org}/${repo}/${destinationPath}`);
     return this.request<DAOperationResponse>(endpoint, {
       method: 'POST',
-      body: JSON.stringify({ sourcePath, destinationPath }),
+      body: formData,
     });
   }
 
@@ -244,10 +247,12 @@ export class DAAdminClient {
     sourcePath: string,
     destinationPath: string,
   ): Promise<DAOperationResponse> {
-    const endpoint = `/move/${org}/${repo}`;
+    const endpoint = `/move/${org}/${repo}/${sourcePath}`;
+    const formData = new FormData();
+    formData.append('destination', `/${org}/${repo}/${destinationPath}`);
     return this.request<DAOperationResponse>(endpoint, {
       method: 'POST',
-      body: JSON.stringify({ sourcePath, destinationPath }),
+      body: formData,
     });
   }
 

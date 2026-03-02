@@ -86,13 +86,26 @@ export default {
       );
     }
 
+    // GET requests attempt to open a long-lived SSE stream for server-initiated messages.
+    // This hangs in stateless Cloudflare Workers (no persistent server context to push events),
+    // causing the runtime to kill the request as "hung".
+    if (request.method === 'GET') {
+      return new Response(null, {
+        status: 405,
+        headers: { Allow: 'POST, DELETE, OPTIONS', ...CORS_HEADERS },
+      });
+    }
+
     // Create fresh client + server per request to prevent cross-client data leaks
     const client = new DAAdminClient({ apiToken: token, daadminService: env.daadmin });
     const server = createServer(client, env.VERSION ?? 'unknown');
 
-    // Stateless transport — new instance per request for Cloudflare Workers
+    // Stateless transport — new instance per request for Cloudflare Workers.
+    // enableJsonResponse avoids SSE streaming for POST responses, which is more reliable
+    // in a stateless per-request execution model.
     const transport = new WebStandardStreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
+      enableJsonResponse: true,
     });
     await server.connect(transport);
 

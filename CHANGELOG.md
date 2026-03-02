@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/adobe-rnd/da-mcp/compare/v1.2.2...v1.2.3) (2026-03-02)
+
+
+### Bug Fixes
+
+* prevent Worker hang on GET /mcp by rejecting SSE stream requests ([5b976aa](https://github.com/adobe-rnd/da-mcp/commit/5b976aaf93095f315ec0927deab238f860733ac4))
+
 ## [1.2.2](https://github.com/adobe-rnd/da-mcp/compare/v1.2.1...v1.2.2) (2026-02-25)
 
 

@@ -69,7 +69,7 @@ All tools accept `org` and `repo` parameters plus operation-specific params:
 | `da_get_versions` | Get version history |
 | `da_lookup_media` | Get media asset info |
 | `da_lookup_fragment` | Get fragment info |
-| `da_upload_media` | Upload binary media file |
+| `da_upload_media` | Upload binary media file from base64 data or a public `sourceUrl` |
 
 ## Deployment
 

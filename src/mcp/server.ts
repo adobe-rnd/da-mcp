@@ -124,7 +124,11 @@ export function createServer(client: DAAdminClient, version: string): McpServer 
   }, (args) => handleLookupFragment(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_upload_media', {
-    description: 'Upload an image or media file to a DA repository using base64-encoded data. '
+    description: 'Upload an image or media file to a DA repository. '
+      + 'Provide exactly one content source: either "base64Data" (base64-encoded bytes) '
+      + 'or "sourceUrl" (a public http/https URL the server fetches directly, e.g. a Firefly '
+      + 'temporary asset URL with a short TTL). When using "sourceUrl", "mimeType" and "fileName" '
+      + 'are auto-derived from the response and URL if not provided. '
       + 'When uploading images referenced in a page (e.g. during page creation or update), '
       + 'place the image in a child folder named after the page, sibling to the page file '
       + '(e.g. page at "docs/my-page.html" → image at "docs/.my-page/image.png" with the folder name with a leading dot). '
@@ -138,9 +142,19 @@ export function createServer(client: DAAdminClient, version: string): McpServer 
         + 'For page-related images use a dot-prefixed folder named after the page: "docs/.my-page/image.png". '
         + 'For standalone uploads use the media folder: "media/image.png".',
       ),
-      base64Data: z.string().describe('Base64-encoded file content'),
-      mimeType: z.string().describe('MIME type of the file (e.g., "image/png", "image/jpeg")'),
-      fileName: z.string().describe('Original filename including extension (e.g., "photo.jpg")'),
+      base64Data: z.string().optional().describe('Base64-encoded file content. Provide this OR "sourceUrl", not both.'),
+      sourceUrl: z.string().url().optional().describe(
+        'Public http/https URL to fetch the media from (e.g. a Firefly temporary asset URL). '
+        + 'Provide this OR "base64Data", not both.',
+      ),
+      mimeType: z.string().optional().describe(
+        'MIME type of the file (e.g., "image/png", "image/jpeg"). '
+        + 'Optional when using "sourceUrl" — derived from the response Content-Type if omitted.',
+      ),
+      fileName: z.string().optional().describe(
+        'Original filename including extension (e.g., "photo.jpg"). '
+        + 'Optional when using "sourceUrl" — derived from the URL or destination path if omitted.',
+      ),
     }),
   }, (args) => handleUploadMedia(client, args) as Promise<CallToolResult>);
 

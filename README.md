@@ -66,6 +66,7 @@ src/
 | `da_get_versions` | Get version history for a file |
 | `da_lookup_media` | Lookup media references |
 | `da_lookup_fragment` | Lookup fragment references |
+| `da_upload_media` | Upload a media file from base64 data or a public `sourceUrl` (e.g. a Firefly temporary asset URL) |
 
 ## Prerequisites
 

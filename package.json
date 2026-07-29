@@ -1,6 +1,6 @@
 {
   "name": "da-mcp",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Remote MCP server for DA Live Admin API on Cloudflare Workers",
   "main": "src/index.ts",
   "type": "module",

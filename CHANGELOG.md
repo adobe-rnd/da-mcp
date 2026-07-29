@@ -1,3 +1,11 @@
+## [1.2.4](https://github.com/adobe-rnd/da-mcp/compare/v1.2.3...v1.2.4) (2026-07-29)
+
+
+### Bug Fixes
+
+* retrigger release after skipped semantic-release run ([f53224f](https://github.com/adobe-rnd/da-mcp/commit/f53224f1d77044819eb50cd8ee1bdbe397ab8d99))
+* use public da-admin host so collab invalidation targets the right room ([2cd4fda](https://github.com/adobe-rnd/da-mcp/commit/2cd4fdaad8200854c75a025b5d013b1a65809e61))
+
 ## [1.2.3](https://github.com/adobe-rnd/da-mcp/compare/v1.2.2...v1.2.3) (2026-03-02)
 
 

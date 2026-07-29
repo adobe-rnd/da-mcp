@@ -63,7 +63,17 @@ export class DAAdminClient {
     const startTime = Date.now();
 
     try {
-      const request = new Request(`https://daadmin${endpoint}`, {
+      // Host must be the public da-admin origin (not a placeholder): da-admin
+      // forwards req.url verbatim to da-collab's syncadmin invalidation, which keys
+      // the Yjs room by the full URL string. A mismatched host invalidates a
+      // phantom room and leaves live collab sessions stale. The service binding
+      // routes by binding, so the host here only affects that propagated URL.
+      //
+      // NOTE: this hardcodes the PRODUCTION origin (admin.da.live). If we ever
+      // deploy an environment that connects to stage (stage-admin.da.live), this
+      // will invalidate the wrong collab room and must be fixed - e.g. thread the
+      // env-specific base URL through DAAdminClient instead of hardcoding here.
+      const request = new Request(`https://admin.da.live${endpoint}`, {
         ...requestOptions,
         headers,
         signal: controller.signal,

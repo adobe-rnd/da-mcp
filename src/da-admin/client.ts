@@ -43,10 +43,7 @@ export class DAAdminClient {
     const headers = new Headers(requestOptions.headers || {});
     headers.set('Authorization', `Bearer ${this.apiToken}`);
 
-    // Mark every write as MCP-initiated. da-admin reads x-da-initiator to (a) tag
-    // the recorded version/audit user as "… (agent)" and (b) decide collab sync:
-    // since 'mcp' !== 'collab', notifyCollab still fires, so live editors see the
-    // agent's edit. Harmless on reads (only /source POST inspects it).
+    // Mark writes as MCP-initiated so da-admin tags the version author as an agent.
     headers.set('x-da-initiator', 'mcp');
 
     // Only set Content-Type for non-FormData, non-binary requests

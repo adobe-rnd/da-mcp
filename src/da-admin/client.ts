@@ -43,6 +43,9 @@ export class DAAdminClient {
     const headers = new Headers(requestOptions.headers || {});
     headers.set('Authorization', `Bearer ${this.apiToken}`);
 
+    // Mark writes as MCP-initiated so da-admin tags the version author as an agent.
+    headers.set('x-da-initiator', 'mcp');
+
     // Only set Content-Type for non-FormData, non-binary requests
     const isFormData = requestOptions.body instanceof FormData;
     if (!binary && !isFormData) {

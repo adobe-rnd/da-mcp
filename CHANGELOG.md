@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/adobe-rnd/da-mcp/compare/v1.2.4...v1.3.0) (2026-08-04)
+
+
+### Features
+
+* send x-da-initiator header to mark MCP-initiated writes ([8e01ba7](https://github.com/adobe-rnd/da-mcp/commit/8e01ba74fc96ceaa9f98777be5a49d528d765988))
+
 ## [1.2.4](https://github.com/adobe-rnd/da-mcp/compare/v1.2.3...v1.2.4) (2026-07-29)
 
 

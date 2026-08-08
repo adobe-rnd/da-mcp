@@ -372,9 +372,94 @@ export async function handleLookupFragment(
   }
 }
 
+const UPLOAD_FETCH_TIMEOUT = 30000; // 30 seconds, mirrors DAAdminClient
+
+/**
+ * Encode raw bytes to a base64 string.
+ */
+function bytesToBase64(bytes: Uint8Array): string {
+  let binaryStr = '';
+  for (let i = 0; i < bytes.length; i += 1) {
+    binaryStr += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binaryStr);
+}
+
+/**
+ * Derive a filename from an explicit override, a source URL, or the DA path.
+ */
+function deriveFileName(
+  override: string | undefined,
+  sourceUrl: string | undefined,
+  daPath: string,
+): string {
+  if (override && override.trim()) return override.trim();
+
+  if (sourceUrl) {
+    try {
+      const { pathname } = new URL(sourceUrl);
+      const urlName = pathname.split('/').filter(Boolean).pop();
+      if (urlName) return urlName;
+    } catch {
+      // fall through to DA path derivation
+    }
+  }
+
+  const pathName = daPath.split('/').filter(Boolean).pop();
+  return pathName || 'upload';
+}
+
+/**
+ * Fetch binary content from a public URL, returning base64 data and MIME type.
+ */
+async function fetchMediaFromUrl(
+  sourceUrl: string,
+  mimeTypeOverride: string | undefined,
+): Promise<{ base64Data: string; mimeType: string; byteSize: number }> {
+  let parsed: URL;
+  try {
+    parsed = new URL(sourceUrl);
+  } catch {
+    throw new Error(`Invalid sourceUrl: ${sourceUrl}`);
+  }
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new Error(`Unsupported URL scheme "${parsed.protocol}". Only http and https are allowed.`);
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), UPLOAD_FETCH_TIMEOUT);
+
+  try {
+    const response = await fetch(sourceUrl, { signal: controller.signal });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sourceUrl (${response.status} ${response.statusText})`);
+    }
+
+    const contentType = response.headers.get('content-type');
+    const mimeType = (mimeTypeOverride
+      || (contentType ? contentType.split(';')[0].trim() : '')
+      || 'application/octet-stream');
+
+    const arrayBuffer = await response.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+
+    return { base64Data: bytesToBase64(bytes), mimeType, byteSize: bytes.length };
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error(`Timed out fetching sourceUrl after ${UPLOAD_FETCH_TIMEOUT}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 /**
  * Handler for da_upload_media tool
- * Uploads images and media files to DA repository
+ * Uploads images and media files to DA repository from either base64 data
+ * or a public URL (e.g. a Firefly temporary asset URL).
  */
 export async function handleUploadMedia(
   client: DAAdminClient,
@@ -382,25 +467,49 @@ export async function handleUploadMedia(
     org: string;
     repo: string;
     path: string;
-    base64Data: string;
-    mimeType: string;
-    fileName: string;
+    base64Data?: string;
+    sourceUrl?: string;
+    mimeType?: string;
+    fileName?: string;
   },
 ) {
   try {
-    // Remove data URL prefix if present (e.g., "data:image/png;base64,")
-    let cleanBase64 = args.base64Data;
-    if (cleanBase64.includes(',')) {
-      [, cleanBase64] = cleanBase64.split(',');
+    const hasBase64 = typeof args.base64Data === 'string' && args.base64Data.length > 0;
+    const hasSourceUrl = typeof args.sourceUrl === 'string' && args.sourceUrl.length > 0;
+
+    if (hasBase64 === hasSourceUrl) {
+      throw new Error(
+        'Provide exactly one of "base64Data" or "sourceUrl".',
+      );
     }
+
+    let cleanBase64: string;
+    let mimeType: string;
+    let byteSize: number | undefined;
+
+    if (hasSourceUrl) {
+      const fetched = await fetchMediaFromUrl(args.sourceUrl!, args.mimeType);
+      cleanBase64 = fetched.base64Data;
+      mimeType = fetched.mimeType;
+      byteSize = fetched.byteSize;
+    } else {
+      // Remove data URL prefix if present (e.g., "data:image/png;base64,")
+      cleanBase64 = args.base64Data!;
+      if (cleanBase64.includes(',')) {
+        [, cleanBase64] = cleanBase64.split(',');
+      }
+      mimeType = args.mimeType || 'application/octet-stream';
+    }
+
+    const fileName = deriveFileName(args.fileName, args.sourceUrl, args.path);
 
     const response = await client.uploadMedia(
       args.org,
       args.repo,
       args.path,
       cleanBase64,
-      args.mimeType,
-      args.fileName,
+      mimeType,
+      fileName,
     );
 
     // Return success with the media path for reference
@@ -411,8 +520,9 @@ export async function handleUploadMedia(
           text: JSON.stringify({
             message: `Media uploaded successfully to ${args.path}`,
             path: args.path,
-            fileName: args.fileName,
-            mimeType: args.mimeType,
+            fileName,
+            mimeType,
+            ...(hasSourceUrl ? { sourceUrl: args.sourceUrl, byteSize } : {}),
             ...response,
           }, null, 2),
         },

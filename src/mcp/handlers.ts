@@ -430,3 +430,93 @@ export async function handleUploadMedia(
     };
   }
 }
+
+// ---------------------------------------------------------------------------
+// fig-inspector tools — parse a Figma .fig via the fig-inspector Worker.
+// These proxy to the deployed fig-inspector Worker; no DA Admin is involved.
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve raw .fig bytes from either an inline base64 payload or a URL to
+ * fetch. Exactly one of `figBase64` / `sourceUrl` should be provided.
+ */
+async function resolveFigBytes(
+  args: { figBase64?: string; sourceUrl?: string },
+): Promise<Uint8Array> {
+  if (args.sourceUrl) {
+    const resp = await fetch(args.sourceUrl);
+    if (!resp.ok) throw new Error(`Failed to fetch sourceUrl (${resp.status})`);
+    return new Uint8Array(await resp.arrayBuffer());
+  }
+  if (args.figBase64) {
+    const binary = atob(args.figBase64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+  throw new Error('Provide either figBase64 or sourceUrl');
+}
+
+/**
+ * Handler for inspect_fig — POST the .fig bytes to the fig-inspector Worker's
+ * /inspect endpoint and return the parsed structure (text runs, design tokens,
+ * image list, preview thumbnail, canvas metadata) as JSON.
+ */
+export async function handleInspectFig(
+  figInspectorUrl: string,
+  args: { figBase64?: string; sourceUrl?: string },
+) {
+  try {
+    const bytes = await resolveFigBytes(args);
+    const resp = await fetch(`${figInspectorUrl.replace(/\/$/, '')}/inspect`, {
+      method: 'POST',
+      body: bytes,
+    });
+    const text = await resp.text();
+    if (!resp.ok) {
+      return {
+        content: [{ type: 'text', text: `fig-inspector /inspect error (${resp.status}): ${text.slice(0, 500)}` }],
+        isError: true,
+      };
+    }
+    return { content: [{ type: 'text', text }] };
+  } catch (error) {
+    return {
+      content: [{ type: 'text', text: formatError(error) }],
+      isError: true,
+    };
+  }
+}
+
+/**
+ * Handler for fig_get_entry — fetch one entry (e.g. "thumbnail.png" or
+ * "images/<hash>") from the .fig via the fig-inspector Worker's /entry
+ * endpoint, returned as an MCP image content block.
+ */
+export async function handleFigGetEntry(
+  figInspectorUrl: string,
+  args: { name: string; figBase64?: string; sourceUrl?: string },
+) {
+  try {
+    const bytes = await resolveFigBytes(args);
+    const url = `${figInspectorUrl.replace(/\/$/, '')}/entry?name=${encodeURIComponent(args.name)}`;
+    const resp = await fetch(url, { method: 'POST', body: bytes });
+    if (!resp.ok) {
+      const text = await resp.text();
+      return {
+        content: [{ type: 'text', text: `fig-inspector /entry error (${resp.status}): ${text.slice(0, 500)}` }],
+        isError: true,
+      };
+    }
+    const mimeType = resp.headers.get('content-type') || 'application/octet-stream';
+    const buf = new Uint8Array(await resp.arrayBuffer());
+    let binary = '';
+    for (let i = 0; i < buf.length; i += 1) binary += String.fromCharCode(buf[i]);
+    return { content: [{ type: 'image', data: btoa(binary), mimeType }] };
+  } catch (error) {
+    return {
+      content: [{ type: 'text', text: formatError(error) }],
+      isError: true,
+    };
+  }
+}

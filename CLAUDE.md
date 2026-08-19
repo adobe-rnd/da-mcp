@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DA MCP is a remote Model Context Protocol (MCP) server for Document Authoring (DA). It provides LLM assistants with direct access to DA management operations via Cloudflare Workers with streamable HTTP transport.
 
-**Architecture flow:** MCP Client → Cloudflare Worker (11 tools) → DA Admin API (admin.da.live)
+**Architecture flow:** MCP Client → Cloudflare Worker (13 tools) → DA Admin API (admin.da.live); the two `*_fig` tools proxy to the fig-inspector Worker instead.
 
 ## Development Commands
 
@@ -70,6 +70,8 @@ All tools accept `org` and `repo` parameters plus operation-specific params:
 | `da_lookup_media` | Get media asset info |
 | `da_lookup_fragment` | Get fragment info |
 | `da_upload_media` | Upload binary media file |
+| `inspect_fig` | Parse a Figma `.fig` (via fig-inspector Worker) → text, tokens, images, thumbnail, canvas |
+| `fig_get_entry` | Fetch one `.fig` asset (thumbnail/image) as an image |
 
 ## Deployment
 

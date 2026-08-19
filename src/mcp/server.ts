@@ -19,13 +19,22 @@ import {
   handleLookupMedia,
   handleUploadMedia,
   handleLookupFragment,
+  handleInspectFig,
+  handleFigGetEntry,
 } from './handlers';
+
+const DEFAULT_FIG_INSPECTOR_URL = 'https://fig-inspector.franklin-prod.workers.dev';
 
 /**
  * Create and configure MCP server with all DA tools registered
  */
-export function createServer(client: DAAdminClient, version: string): McpServer {
+export function createServer(
+  client: DAAdminClient,
+  version: string,
+  figInspectorUrl?: string,
+): McpServer {
   const server = new McpServer({ name: 'da-live-admin', version });
+  const figUrl = figInspectorUrl || DEFAULT_FIG_INSPECTOR_URL;
 
   server.registerTool('da_list_sources', {
     description: 'List all sources and directories in a DA repository at a given path. Returns a list of files and folders with their metadata.',
@@ -143,6 +152,27 @@ export function createServer(client: DAAdminClient, version: string): McpServer 
       fileName: z.string().describe('Original filename including extension (e.g., "photo.jpg")'),
     }),
   }, (args) => handleUploadMedia(client, args) as Promise<CallToolResult>);
+
+  server.registerTool('inspect_fig', {
+    description: 'Parse a Figma .fig file offline (no Figma token) and return its structure: '
+      + 'recovered text runs, design tokens, the image asset list, a preview thumbnail (base64), '
+      + 'and canvas metadata. Provide the .fig either inline as base64 (figBase64) or as a fetchable '
+      + 'URL (sourceUrl). Use this as the first step of converting a Figma design into an EDS landing page.',
+    inputSchema: z.object({
+      figBase64: z.string().optional().describe('Base64-encoded .fig file bytes. Provide this OR sourceUrl.'),
+      sourceUrl: z.string().optional().describe('URL to fetch the .fig from. Provide this OR figBase64.'),
+    }),
+  }, (args) => handleInspectFig(figUrl, args) as Promise<CallToolResult>);
+
+  server.registerTool('fig_get_entry', {
+    description: 'Fetch one asset from a .fig by name (e.g. "thumbnail.png" or an "images/<hash>" '
+      + 'entry from inspect_fig output), returned as an image. Provide the .fig via figBase64 or sourceUrl.',
+    inputSchema: z.object({
+      name: z.string().describe('Entry name, e.g. "thumbnail.png" or "images/<hash>".'),
+      figBase64: z.string().optional().describe('Base64-encoded .fig file bytes. Provide this OR sourceUrl.'),
+      sourceUrl: z.string().optional().describe('URL to fetch the .fig from. Provide this OR figBase64.'),
+    }),
+  }, (args) => handleFigGetEntry(figUrl, args) as Promise<CallToolResult>);
 
   return server;
 }

@@ -11,6 +11,7 @@ export interface Env {
   ENVIRONMENT?: string;
   VERSION?: string;
   DA_ADMIN_API_TOKEN?: string; // Optional fallback token for testing
+  FIG_INSPECTOR_URL?: string; // Optional override for the fig-inspector Worker base URL
   daadmin: Fetcher; // Service binding to DA Admin worker
 }
 
@@ -98,7 +99,7 @@ export default {
 
     // Create fresh client + server per request to prevent cross-client data leaks
     const client = new DAAdminClient({ apiToken: token, daadminService: env.daadmin });
-    const server = createServer(client, env.VERSION ?? 'unknown');
+    const server = createServer(client, env.VERSION ?? 'unknown', env.FIG_INSPECTOR_URL);
 
     // Stateless transport — new instance per request for Cloudflare Workers.
     // enableJsonResponse avoids SSE streaming for POST responses, which is more reliable

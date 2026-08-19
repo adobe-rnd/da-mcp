@@ -12,9 +12,10 @@ import {
   DAMediaContent,
   DAMediaReference,
   DAOperationResponse,
+  IAdminClient,
 } from './types';
 
-export class DAAdminClient {
+export class DAAdminClient implements IAdminClient {
   private apiToken: string;
 
   private daadminService: Fetcher;

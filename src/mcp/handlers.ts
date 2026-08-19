@@ -3,8 +3,7 @@
  * Business logic for each MCP tool
  */
 
-import { DAAdminClient } from '../da-admin/client';
-import { DAAPIError } from '../da-admin/types';
+import { DAAPIError, IAdminClient } from '../da-admin/types';
 import { normalizePath, normalizePagePath } from '../utils/path';
 
 /**
@@ -29,7 +28,7 @@ function formatError(error: unknown): string {
  * Handler for da_list_sources tool
  */
 export async function handleListSources(
-  client: DAAdminClient,
+  client: IAdminClient,
   args: { org: string; repo: string; path?: string },
 ) {
   try {
@@ -60,7 +59,7 @@ export async function handleListSources(
  * Handler for da_get_source tool
  */
 export async function handleGetSource(
-  client: DAAdminClient,
+  client: IAdminClient,
   args: { org: string; repo: string; path: string },
 ) {
   try {
@@ -91,7 +90,7 @@ export async function handleGetSource(
  * Handler for da_create_source tool
  */
 export async function handleCreateSource(
-  client: DAAdminClient,
+  client: IAdminClient,
   args: { org: string; repo: string; path: string; content: string; contentType?: string },
 ) {
   try {
@@ -128,7 +127,7 @@ export async function handleCreateSource(
  * Handler for da_update_source tool
  */
 export async function handleUpdateSource(
-  client: DAAdminClient,
+  client: IAdminClient,
   args: { org: string; repo: string; path: string; content: string; contentType?: string },
 ) {
   try {
@@ -165,7 +164,7 @@ export async function handleUpdateSource(
  * Handler for da_delete_source tool
  */
 export async function handleDeleteSource(
-  client: DAAdminClient,
+  client: IAdminClient,
   args: { org: string; repo: string; path: string },
 ) {
   try {
@@ -196,7 +195,7 @@ export async function handleDeleteSource(
  * Handler for da_copy_content tool
  */
 export async function handleCopyContent(
-  client: DAAdminClient,
+  client: IAdminClient,
   args: { org: string; repo: string; sourcePath: string; destinationPath: string },
 ) {
   try {
@@ -233,7 +232,7 @@ export async function handleCopyContent(
  * Handler for da_move_content tool
  */
 export async function handleMoveContent(
-  client: DAAdminClient,
+  client: IAdminClient,
   args: { org: string; repo: string; sourcePath: string; destinationPath: string },
 ) {
   try {
@@ -270,7 +269,7 @@ export async function handleMoveContent(
  * Handler for da_get_versions tool
  */
 export async function handleGetVersions(
-  client: DAAdminClient,
+  client: IAdminClient,
   args: { org: string; repo: string; path: string },
 ) {
   try {
@@ -301,7 +300,7 @@ export async function handleGetVersions(
  * Handler for da_lookup_media tool
  */
 export async function handleLookupMedia(
-  client: DAAdminClient,
+  client: IAdminClient,
   args: { org: string; repo: string; mediaPath: string },
 ) {
   try {
@@ -345,7 +344,7 @@ export async function handleLookupMedia(
  * Handler for da_lookup_fragment tool
  */
 export async function handleLookupFragment(
-  client: DAAdminClient,
+  client: IAdminClient,
   args: { org: string; repo: string; fragmentPath: string },
 ) {
   try {
@@ -377,7 +376,7 @@ export async function handleLookupFragment(
  * Uploads images and media files to DA repository
  */
 export async function handleUploadMedia(
-  client: DAAdminClient,
+  client: IAdminClient,
   args: {
     org: string;
     repo: string;

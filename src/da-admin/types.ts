@@ -76,3 +76,46 @@ export interface DAAPIError {
   message: string;
   details?: any;
 }
+
+export interface IAdminClient {
+  listSources(org: string, repo: string, path?: string): Promise<DAListSourcesResponse>;
+  getSource(org: string, repo: string, path: string): Promise<DASourceContent>;
+  createSource(
+    org: string,
+    repo: string,
+    path: string,
+    content: string,
+    contentType?: string,
+  ): Promise<DAOperationResponse>;
+  updateSource(
+    org: string,
+    repo: string,
+    path: string,
+    content: string,
+    contentType?: string,
+  ): Promise<DAOperationResponse>;
+  deleteSource(org: string, repo: string, path: string): Promise<DAOperationResponse>;
+  copyContent(
+    org: string,
+    repo: string,
+    sourcePath: string,
+    destinationPath: string,
+  ): Promise<DAOperationResponse>;
+  moveContent(
+    org: string,
+    repo: string,
+    sourcePath: string,
+    destinationPath: string,
+  ): Promise<DAOperationResponse>;
+  getVersions(org: string, repo: string, path: string): Promise<DAVersionsResponse>;
+  lookupMedia(org: string, repo: string, mediaPath: string): Promise<DAMediaContent>;
+  lookupFragment(org: string, repo: string, fragmentPath: string): Promise<DAMediaReference>;
+  uploadMedia(
+    org: string,
+    repo: string,
+    path: string,
+    base64Data: string,
+    mimeType: string,
+    fileName: string,
+  ): Promise<DAOperationResponse>;
+}

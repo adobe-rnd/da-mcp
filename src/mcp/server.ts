@@ -6,7 +6,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { DAAdminClient } from '../da-admin/client';
+import { IAdminClient } from '../da-admin/types';
 import {
   handleListSources,
   handleGetSource,
@@ -24,7 +24,7 @@ import {
 /**
  * Create and configure MCP server with all DA tools registered
  */
-export function createServer(client: DAAdminClient, version: string): McpServer {
+export function createServer(client: IAdminClient, version: string): McpServer {
   const server = new McpServer({ name: 'da-live-admin', version });
 
   server.registerTool('da_list_sources', {

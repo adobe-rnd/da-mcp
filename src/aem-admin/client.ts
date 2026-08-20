@@ -76,15 +76,18 @@ export class AemAdminClient implements IAdminClient {
           message: response.statusText,
           backend: 'aem-admin',
         };
+        const xError = response.headers.get('x-error');
+        if (xError) {
+          error.details = { ...error.details, xError };
+        }
         try {
           const errorData: any = await response.json();
-          error.details = errorData;
+          error.details = { ...error.details, ...errorData };
           error.message = errorData.message || error.message;
-          console.log('AEM Admin API Error:', JSON.stringify(error, null, 2));
         } catch {
           // response body was not JSON, keep statusText
-          console.log('AEM Admin API Error:', error.status, error.message);
         }
+        console.log('AEM Admin API Error:', JSON.stringify(error, null, 2));
         throw error;
       }
 

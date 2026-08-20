@@ -238,4 +238,17 @@ describe('AemAdminClient', () => {
       message: 'not found',
     });
   });
+
+  it('surfaces the x-error response header on a non-ok response', async () => {
+    fetchMock.mockResolvedValue(new Response('', {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: { 'x-error': 'invalid path: docs/new-page.html' },
+    }));
+
+    await expect(client.createSource('acme', 'site1', 'docs/new-page.html', '<p>hi</p>')).rejects.toMatchObject({
+      status: 400,
+      details: { xError: 'invalid path: docs/new-page.html' },
+    });
+  });
 });

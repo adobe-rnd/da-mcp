@@ -81,6 +81,7 @@ export class DAAdminClient implements IAdminClient {
         const error: DAAPIError = {
           status: response.status,
           message: response.statusText,
+          backend: 'da-admin',
         };
 
         try {
@@ -125,6 +126,7 @@ export class DAAdminClient implements IAdminClient {
         console.log('DA Admin API Timeout after', this.timeout, 'ms');
         const timeoutError = new Error('Request timeout') as Error & DAAPIError;
         timeoutError.status = 408;
+        timeoutError.backend = 'da-admin';
         throw timeoutError;
       }
 

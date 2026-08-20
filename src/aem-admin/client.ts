@@ -71,7 +71,11 @@ export class AemAdminClient implements IAdminClient {
       console.log('AEM Admin API Response:', response.status, response.statusText, `(${duration}ms)`);
 
       if (!response.ok) {
-        const error: DAAPIError = { status: response.status, message: response.statusText };
+        const error: DAAPIError = {
+          status: response.status,
+          message: response.statusText,
+          backend: 'aem-admin',
+        };
         try {
           const errorData: any = await response.json();
           error.details = errorData;
@@ -111,6 +115,7 @@ export class AemAdminClient implements IAdminClient {
         console.log('AEM Admin API Timeout after', this.timeout, 'ms');
         const timeoutError = new Error('Request timeout') as Error & DAAPIError;
         timeoutError.status = 408;
+        timeoutError.backend = 'aem-admin';
         throw timeoutError;
       }
       console.log('AEM Admin API Request Failed:', error);

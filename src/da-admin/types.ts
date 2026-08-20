@@ -75,6 +75,13 @@ export interface DAAPIError {
   status: number;
   message: string;
   details?: any;
+  /**
+   * Which admin backend produced this error. Set by DAAdminClient
+   * ('da-admin') and AemAdminClient ('aem-admin') so formatError() in
+   * src/mcp/handlers.ts can label the error correctly regardless of
+   * which backend an org/repo was routed to.
+   */
+  backend?: 'da-admin' | 'aem-admin';
 }
 
 export interface IAdminClient {

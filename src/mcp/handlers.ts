@@ -12,7 +12,11 @@ import { normalizePath, normalizePagePath } from '../utils/path';
 function formatError(error: unknown): string {
   if (typeof error === 'object' && error !== null && 'status' in error) {
     const daError = error as DAAPIError;
-    return `DA Admin API Error (${daError.status}): ${daError.message}${
+    const label = {
+      'da-admin': 'DA Admin API Error',
+      'aem-admin': 'AEM Admin API Error',
+    }[daError.backend as string] || 'Admin API Error';
+    return `${label} (${daError.status}): ${daError.message}${
       daError.details ? `\n${JSON.stringify(daError.details, null, 2)}` : ''
     }`;
   }

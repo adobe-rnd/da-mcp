@@ -4,7 +4,7 @@
  */
 
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
-import { DAAdminClient } from './da-admin/client';
+import { AdminClient } from './admin/admin-client';
 import { createServer } from './mcp/server';
 
 export interface Env {
@@ -12,6 +12,9 @@ export interface Env {
   VERSION?: string;
   DA_ADMIN_API_TOKEN?: string; // Optional fallback token for testing
   daadmin: Fetcher; // Service binding to DA Admin worker
+  HLX6_STATUS_KV: KVNamespace; // Cache of org/repo -> HLX6-migrated status
+  HLX_ADMIN_BASE_URL?: string; // Legacy admin host used for the HLX6 ping check
+  AEM_API_BASE_URL?: string; // HLX6 admin host
 }
 
 const CORS_HEADERS = {
@@ -97,7 +100,13 @@ export default {
     }
 
     // Create fresh client + server per request to prevent cross-client data leaks
-    const client = new DAAdminClient({ apiToken: token, daadminService: env.daadmin });
+    const client = new AdminClient({
+      apiToken: token,
+      daadminService: env.daadmin,
+      kv: env.HLX6_STATUS_KV,
+      hlxAdminBaseUrl: env.HLX_ADMIN_BASE_URL,
+      aemApiBaseUrl: env.AEM_API_BASE_URL,
+    });
     const server = createServer(client, env.VERSION ?? 'unknown');
 
     // Stateless transport — new instance per request for Cloudflare Workers.

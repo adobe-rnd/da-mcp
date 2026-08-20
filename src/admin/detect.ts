@@ -31,12 +31,20 @@ export async function isHlx6(
 
   const cached = await kv.get(cacheKey);
   if (cached === 'true') {
+    console.log(`HLX6 detection: ${cacheKey} -> HLX6 (KV cache hit)`);
     return true;
   }
 
   try {
-    const response = await fetch(`${pingBaseUrl}/ping/${org}/${repo}`);
+    const pingUrl = `${pingBaseUrl}/ping/${org}/${repo}`;
+    const response = await fetch(pingUrl);
     const upgraded = response.headers.get('x-api-upgrade-available') !== null;
+
+    console.log(
+      `HLX6 detection: ${cacheKey} -> ${upgraded ? 'HLX6' : 'legacy'} `
+      + `(ping ${pingUrl} -> ${response.status}, `
+      + `x-api-upgrade-available=${response.headers.get('x-api-upgrade-available') ?? '<absent>'})`,
+    );
 
     if (upgraded) {
       await kv.put(cacheKey, 'true', { expirationTtl: ttlSeconds });
@@ -44,7 +52,7 @@ export async function isHlx6(
 
     return upgraded;
   } catch (error) {
-    console.log('HLX6 ping failed, defaulting to legacy backend:', error);
+    console.log(`HLX6 detection: ${cacheKey} -> legacy (ping failed, defaulting to legacy backend):`, error);
     return false;
   }
 }

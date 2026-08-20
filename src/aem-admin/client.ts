@@ -44,9 +44,20 @@ export class AemAdminClient implements IAdminClient {
     const { binary, ...requestOptions } = options;
     const headers = new Headers(requestOptions.headers || {});
     headers.set('Authorization', `Bearer ${this.apiToken}`);
+    const method = requestOptions.method || 'GET';
+
+    console.log(`AEM Admin API Call: Method: ${method} Endpoint: ${endpoint}`);
+    if (requestOptions.body !== undefined) {
+      const bodyLength = typeof requestOptions.body === 'string'
+        ? requestOptions.body.length
+        : (requestOptions.body as Uint8Array).byteLength;
+      console.log(`  Content-Type: ${headers.get('Content-Type')}, Body length: ${bodyLength} bytes`);
+    }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    const startTime = Date.now();
 
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
@@ -56,14 +67,19 @@ export class AemAdminClient implements IAdminClient {
       });
       clearTimeout(timeoutId);
 
+      const duration = Date.now() - startTime;
+      console.log('AEM Admin API Response:', response.status, response.statusText, `(${duration}ms)`);
+
       if (!response.ok) {
         const error: DAAPIError = { status: response.status, message: response.statusText };
         try {
           const errorData: any = await response.json();
           error.details = errorData;
           error.message = errorData.message || error.message;
+          console.log('AEM Admin API Error:', JSON.stringify(error, null, 2));
         } catch {
           // response body was not JSON, keep statusText
+          console.log('AEM Admin API Error:', error.status, error.message);
         }
         throw error;
       }
@@ -92,10 +108,12 @@ export class AemAdminClient implements IAdminClient {
     } catch (error) {
       clearTimeout(timeoutId);
       if (error instanceof Error && error.name === 'AbortError') {
+        console.log('AEM Admin API Timeout after', this.timeout, 'ms');
         const timeoutError = new Error('Request timeout') as Error & DAAPIError;
         timeoutError.status = 408;
         throw timeoutError;
       }
+      console.log('AEM Admin API Request Failed:', error);
       throw error;
     }
   }

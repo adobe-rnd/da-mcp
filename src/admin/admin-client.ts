@@ -53,6 +53,7 @@ export class AdminClient implements IAdminClient {
 
   private async pickClient(org: string, repo: string): Promise<IAdminClient> {
     const hlx6 = await isHlx6(org, repo, this.kv, { pingBaseUrl: this.hlxAdminBaseUrl });
+    console.log(`AdminClient: routing ${org}/${repo} -> ${hlx6 ? 'AemAdminClient (api.aem.live)' : 'DAAdminClient (admin.da.live)'}`);
     return hlx6 ? this.aem : this.legacy;
   }
 

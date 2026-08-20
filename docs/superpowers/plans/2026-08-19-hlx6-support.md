@@ -1371,9 +1371,9 @@ git commit -m "feat: add AdminClient facade routing legacy vs HLX6 per org/repo"
 Run these commands (they require Cloudflare account credentials already configured for `wrangler`):
 
 ```bash
-npx wrangler kv namespace create HLX6_STATUS_KV
-npx wrangler kv namespace create HLX6_STATUS_KV --env ci
-npx wrangler kv namespace create HLX6_STATUS_KV --env production
+npx wrangler kv namespace create DA_MCP_HLX6_STATUS_KV
+npx wrangler kv namespace create DA_MCP_HLX6_STATUS_KV --env ci
+npx wrangler kv namespace create DA_MCP_HLX6_STATUS_KV --env production
 ```
 
 Each command prints an `id` (and for the first, also update the base/dev config). Keep the three ids handy for Step 3.
@@ -1392,7 +1392,7 @@ export interface Env {
   VERSION?: string;
   DA_ADMIN_API_TOKEN?: string; // Optional fallback token for testing
   daadmin: Fetcher; // Service binding to DA Admin worker
-  HLX6_STATUS_KV: KVNamespace; // Cache of org/repo -> HLX6-migrated status
+  DA_MCP_HLX6_STATUS_KV: KVNamespace; // Cache of org/repo -> HLX6-migrated status
   HLX_ADMIN_BASE_URL?: string; // Legacy admin host used for the HLX6 ping check
   AEM_API_BASE_URL?: string; // HLX6 admin host
 }
@@ -1405,7 +1405,7 @@ Change the client construction inside the `fetch` handler:
     const client = new AdminClient({
       apiToken: token,
       daadminService: env.daadmin,
-      kv: env.HLX6_STATUS_KV,
+      kv: env.DA_MCP_HLX6_STATUS_KV,
       hlxAdminBaseUrl: env.HLX_ADMIN_BASE_URL,
       aemApiBaseUrl: env.AEM_API_BASE_URL,
     });
@@ -1422,7 +1422,7 @@ services = [
 ]
 
 kv_namespaces = [
-  { binding = "HLX6_STATUS_KV", id = "<PASTE_ID_FROM_STEP_1_DEFAULT_COMMAND>" }
+  { binding = "DA_MCP_HLX6_STATUS_KV", id = "<PASTE_ID_FROM_STEP_1_DEFAULT_COMMAND>" }
 ]
 ```
 
@@ -1436,7 +1436,7 @@ services = [
   { binding = "daadmin", service = "da-admin-stage" }
 ]
 kv_namespaces = [
-  { binding = "HLX6_STATUS_KV", id = "<PASTE_ID_FROM_STEP_1_CI_COMMAND>" }
+  { binding = "DA_MCP_HLX6_STATUS_KV", id = "<PASTE_ID_FROM_STEP_1_CI_COMMAND>" }
 ]
 
 [env.ci.vars]
@@ -1450,7 +1450,7 @@ services = [
   { binding = "daadmin", service = "da-admin" }
 ]
 kv_namespaces = [
-  { binding = "HLX6_STATUS_KV", id = "<PASTE_ID_FROM_STEP_1_PRODUCTION_COMMAND>" }
+  { binding = "DA_MCP_HLX6_STATUS_KV", id = "<PASTE_ID_FROM_STEP_1_PRODUCTION_COMMAND>" }
 ]
 
 [env.production.vars]

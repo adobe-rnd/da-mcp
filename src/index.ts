@@ -12,7 +12,7 @@ export interface Env {
   VERSION?: string;
   DA_ADMIN_API_TOKEN?: string; // Optional fallback token for testing
   daadmin: Fetcher; // Service binding to DA Admin worker
-  HLX6_STATUS_KV: KVNamespace; // Cache of org/repo -> HLX6-migrated status
+  DA_MCP_HLX6_STATUS_KV: KVNamespace; // Cache of org/repo -> HLX6-migrated status
   HLX_ADMIN_BASE_URL?: string; // Legacy admin host used for the HLX6 ping check
   AEM_API_BASE_URL?: string; // HLX6 admin host
 }
@@ -103,7 +103,7 @@ export default {
     const client = new AdminClient({
       apiToken: token,
       daadminService: env.daadmin,
-      kv: env.HLX6_STATUS_KV,
+      kv: env.DA_MCP_HLX6_STATUS_KV,
       hlxAdminBaseUrl: env.HLX_ADMIN_BASE_URL,
       aemApiBaseUrl: env.AEM_API_BASE_URL,
     });

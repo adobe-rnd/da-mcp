@@ -74,7 +74,7 @@ rather than a separate `src/hlx6/` module).
 isHlx6(org, repo, env): Promise<boolean>
 ```
 
-- Check `env.HLX6_STATUS_KV` for key `${org}/${repo}` first.
+- Check `env.DA_MCP_HLX6_STATUS_KV` for key `${org}/${repo}` first.
 - On cache miss: `fetch('https://admin.hlx.page/ping/{org}/{repo}')`
   (same host as da-nx's legacy `HLX_ADMIN`). Migrated ⇔ response contains
   header `x-api-upgrade-available` (any value).
@@ -114,7 +114,7 @@ src/admin/
 ```
 
 `src/index.ts` constructs `new AdminClient({ apiToken, daadminService: env.daadmin,
-kv: env.HLX6_STATUS_KV, ... })` instead of `new DAAdminClient(...)`.
+kv: env.DA_MCP_HLX6_STATUS_KV, ... })` instead of `new DAAdminClient(...)`.
 `src/mcp/handlers.ts` and `src/mcp/server.ts` only change their type import
 from `DAAdminClient` to `AdminClient` — no other logic changes, because the
 facade's method signatures and return shapes are identical to today's
@@ -123,7 +123,7 @@ facade's method signatures and return shapes are identical to today's
 ## Config changes
 
 `wrangler.toml`:
-- Add a KV namespace binding `HLX6_STATUS_KV` to each environment (dev, ci,
+- Add a KV namespace binding `DA_MCP_HLX6_STATUS_KV` to each environment (dev, ci,
   production — separate namespace ids per environment, created via
   `wrangler kv namespace create`).
 - Add optional vars `HLX_ADMIN_BASE_URL` (default `https://admin.hlx.page`)

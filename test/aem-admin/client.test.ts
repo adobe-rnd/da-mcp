@@ -48,7 +48,7 @@ describe('AemAdminClient', () => {
     expect(result).toEqual({
       sources: [
         {
-          name: 'page.html',
+          name: 'page',
           path: 'docs/page.html',
           type: 'file',
           lastModified: '2021-01-01T00:00:00.000Z',

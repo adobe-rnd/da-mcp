@@ -24,14 +24,14 @@ describe('mapFolderListing', () => {
     expect(result).toEqual({
       sources: [
         {
-          name: 'my-page.html',
+          name: 'my-page',
           path: 'docs/my-page.html',
           type: 'file',
           lastModified: '2021-05-29T21:00:00.000Z',
           size: 12345,
         },
         {
-          name: 'my-subfolder/',
+          name: 'my-subfolder',
           path: 'docs/my-subfolder/',
           type: 'directory',
           lastModified: undefined,
@@ -53,6 +53,39 @@ describe('mapFolderListing', () => {
     );
 
     expect(result.sources[0].path).toBe('index.html');
+  });
+
+  it('strips the extension from a file name but keeps the extension in the path', () => {
+    const result = mapFolderListing(
+      [{ name: 'admin-apikeys.html', 'content-type': 'text/html' }],
+      'adobe',
+      'aem-website',
+      'docs',
+    );
+
+    expect(result.sources[0]).toMatchObject({ name: 'admin-apikeys', path: 'docs/admin-apikeys.html' });
+  });
+
+  it('strips only the trailing slash from a directory name but keeps it in the path', () => {
+    const result = mapFolderListing(
+      [{ name: 'assets/', 'content-type': 'application/folder' }],
+      'adobe',
+      'aem-website',
+      'docs',
+    );
+
+    expect(result.sources[0]).toMatchObject({ name: 'assets', path: 'docs/assets/' });
+  });
+
+  it('preserves the full name (no extension) for a file with no extension', () => {
+    const result = mapFolderListing(
+      [{ name: 'README', 'content-type': 'text/plain' }],
+      'acme',
+      'site1',
+      '',
+    );
+
+    expect(result.sources[0]).toMatchObject({ name: 'README', path: 'README' });
   });
 });
 

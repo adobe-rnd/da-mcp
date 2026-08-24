@@ -1,3 +1,23 @@
+# [1.4.0](https://github.com/adobe-rnd/da-mcp/compare/v1.3.0...v1.4.0) (2026-08-24)
+
+
+### Bug Fixes
+
+* align HLX6 listSources name field with legacy DA admin convention ([81d0168](https://github.com/adobe-rnd/da-mcp/commit/81d01681ddca353800fdb766dc5444076137164e))
+* fix bindings ([ab4d7d4](https://github.com/adobe-rnd/da-mcp/commit/ab4d7d4fbb61fa6e4166f7c8b78e8a7498755524))
+* fix bindings ([0c70b48](https://github.com/adobe-rnd/da-mcp/commit/0c70b48abf735e1e0098b71e8c90c6c6611a5f84))
+* make MCP error messages backend-aware (DA Admin vs AEM Admin) ([9aa3509](https://github.com/adobe-rnd/da-mcp/commit/9aa3509ed3b65157b9c424d87f9f472a6e32e010))
+
+
+### Features
+
+* add AdminClient facade routing legacy vs HLX6 per org/repo ([32a7321](https://github.com/adobe-rnd/da-mcp/commit/32a7321c3d2cd37183c9dd6127cd52cab94ba7e8))
+* add AemAdminClient for api.aem.live (HLX6) ([f4dad20](https://github.com/adobe-rnd/da-mcp/commit/f4dad208c367aa24e714e64284684c74368a4db8))
+* add HLX6 detection via cached ping ([14cfbbc](https://github.com/adobe-rnd/da-mcp/commit/14cfbbce43aa977ad246fd64512aaf15097a419c))
+* add HLX6 response types and normalization mappers ([5ef549e](https://github.com/adobe-rnd/da-mcp/commit/5ef549e1b45f731739032c2c3fe3dd7d487008ca))
+* surface x-error response header from api.aem.live error responses ([a8e6dc9](https://github.com/adobe-rnd/da-mcp/commit/a8e6dc99e86d459a36546dd821831b772cbfc989))
+* wire AdminClient (HLX6-aware) into the Worker entry point ([a6983c6](https://github.com/adobe-rnd/da-mcp/commit/a6983c65cf8deb4879bacbf51ebfdcab0576cf1b))
+
 # [1.3.0](https://github.com/adobe-rnd/da-mcp/compare/v1.2.4...v1.3.0) (2026-08-04)
 
 

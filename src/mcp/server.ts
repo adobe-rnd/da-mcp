@@ -30,28 +30,28 @@ export function createServer(client: IAdminClient, version: string): McpServer {
   const server = new McpServer({ name: 'da-live-admin', version });
 
   server.registerTool('da_list_sources', {
-    description: 'List all sources and directories in a DA repository at a given path. Returns a list of files and folders with their metadata.',
+    description: 'List all sources and directories in a site at a given path. Returns a list of files and folders with their metadata.',
     inputSchema: z.object({
       org: z.string().describe('Organization name (e.g., "adobe")'),
-      repo: z.string().describe('Repository name (e.g., "my-docs")'),
+      repo: z.string().describe('Site / Repository name (e.g., "my-docs")'),
       path: z.string().optional().describe('Optional path within repository (e.g., "docs/guides"). Leave empty for root.'),
     }),
   }, (args) => handleListSources(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_get_source', {
-    description: 'Get the content of a specific source file from a DA repository. Returns the file content and metadata.',
+    description: 'Get the content of a specific source file from a site. Returns the file content and metadata.',
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
-      repo: z.string().describe('Repository name'),
+      repo: z.string().describe('Site / Repository name'),
       path: z.string().describe('Path to the file within the repository (e.g., "docs/index.md")'),
     }),
   }, (args) => handleGetSource(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_create_source', {
-    description: 'Create a new source file in a DA repository with the specified content.',
+    description: 'Create a new source file in a site with the specified content.',
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
-      repo: z.string().describe('Repository name'),
+      repo: z.string().describe('Site / Repository name'),
       path: z.string().describe('Path where the new file should be created (e.g., "docs/new-page.md")'),
       content: z.string().describe('Content of the new file'),
       contentType: z.string().optional().describe('Optional content type (e.g., "text/markdown", "text/html")'),
@@ -59,10 +59,10 @@ export function createServer(client: IAdminClient, version: string): McpServer {
   }, (args) => handleCreateSource(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_update_source', {
-    description: 'Update an existing source file in a DA repository with new content.',
+    description: 'Update an existing source file in a site with new content.',
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
-      repo: z.string().describe('Repository name'),
+      repo: z.string().describe('Site / Repository name'),
       path: z.string().describe('Path to the file to update'),
       content: z.string().describe('New content for the file'),
       contentType: z.string().optional().describe('Optional content type'),
@@ -70,45 +70,45 @@ export function createServer(client: IAdminClient, version: string): McpServer {
   }, (args) => handleUpdateSource(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_delete_source', {
-    description: 'Delete a source file from a DA repository. Use with caution as this operation cannot be undone.',
+    description: 'Delete a source file from a site. Use with caution as this operation cannot be undone.',
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
-      repo: z.string().describe('Repository name'),
+      repo: z.string().describe('Site / Repository name'),
       path: z.string().describe('Path to the file to delete'),
     }),
   }, (args) => handleDeleteSource(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_copy_content', {
-    description: 'Copy content from one location to another within a DA repository. Creates a duplicate of the source at the destination.',
+    description: 'Copy content from one location to another within a site. Creates a duplicate of the source at the destination.',
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
-      repo: z.string().describe('Repository name'),
+      repo: z.string().describe('Site / Repository name'),
       sourcePath: z.string().describe('Path to the source file to copy from'),
       destinationPath: z.string().describe('Path where the file should be copied to'),
     }),
   }, (args) => handleCopyContent(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_move_content', {
-    description: 'Move content from one location to another within a DA repository. The source file will be removed.',
+    description: 'Move content from one location to another within a site. The source file will be removed.',
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
-      repo: z.string().describe('Repository name'),
+      repo: z.string().describe('Site / Repository name'),
       sourcePath: z.string().describe('Path to the source file to move from'),
       destinationPath: z.string().describe('Path where the file should be moved to'),
     }),
   }, (args) => handleMoveContent(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_get_versions', {
-    description: 'Get version history for a source file in a DA repository. Returns a list of versions with timestamps and metadata.',
+    description: 'Get version history for a source file in a site. Returns a list of versions with timestamps and metadata.',
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
-      repo: z.string().describe('Repository name'),
+      repo: z.string().describe('Site / Repository name'),
       path: z.string().describe('Path to the file'),
     }),
   }, (args) => handleGetVersions(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_create_version', {
-    description: 'Create a snapshot version of a source file in a repository. '
+    description: 'Create a snapshot version of a source file in a site. '
       + 'Versions are also created automatically when a file is updated, so this is '
       + 'mainly useful to explicitly checkpoint a file before making risky changes.',
     inputSchema: z.object({
@@ -133,25 +133,25 @@ export function createServer(client: IAdminClient, version: string): McpServer {
   }, (args) => handleGetVersion(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_lookup_media', {
-    description: 'Lookup media references in a DA repository. Returns information about media assets including URLs and metadata.',
+    description: 'Lookup media references in a site. Returns information about media assets including URLs and metadata.',
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
-      repo: z.string().describe('Repository name'),
+      repo: z.string().describe('Site / Repository name'),
       mediaPath: z.string().describe('Path to the media file'),
     }),
   }, (args) => handleLookupMedia(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_lookup_fragment', {
-    description: 'Lookup fragment references in a DA repository. Returns information about content fragments.',
+    description: 'Lookup fragment references in a site. Returns information about content fragments.',
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
-      repo: z.string().describe('Repository name'),
+      repo: z.string().describe('Site / Repository name'),
       fragmentPath: z.string().describe('Path to the fragment'),
     }),
   }, (args) => handleLookupFragment(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_upload_media', {
-    description: 'Upload an image or media file to a DA repository using base64-encoded data. '
+    description: 'Upload an image or media file to a site using base64-encoded data. '
       + 'When uploading images referenced in a page (e.g. during page creation or update), '
       + 'place the image in a child folder named after the page, sibling to the page file '
       + '(e.g. page at "docs/my-page.html" → image at "docs/.my-page/image.png" with the folder name with a leading dot). '
@@ -159,7 +159,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       + '(e.g. "media/image.png").',
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
-      repo: z.string().describe('Repository name'),
+      repo: z.string().describe('Site / Repository name'),
       path: z.string().describe(
         'Destination path for the media file. '
         + 'For page-related images use a dot-prefixed folder named after the page: "docs/.my-page/image.png". '

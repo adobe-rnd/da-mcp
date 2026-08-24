@@ -43,6 +43,7 @@ export function mapVersionListing(entries: AemVersionListingEntry[]): DAVersions
   const versions: DAVersion[] = entries.map((entry) => ({
     timestamp: entry['version-date'] ? new Date(entry['version-date']).getTime() : 0,
     path: entry['doc-path-hint'] || '',
+    url: entry.version,
     users: entry['version-by'] ? [{ email: entry['version-by'] }] : [],
   }));
 

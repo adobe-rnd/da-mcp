@@ -301,6 +301,68 @@ export async function handleGetVersions(
 }
 
 /**
+ * Handler for da_create_version tool
+ */
+export async function handleCreateVersion(
+  client: IAdminClient,
+  args: { org: string; repo: string; path: string; label?: string },
+) {
+  try {
+    const normalizedPath = normalizePagePath(args.path)!;
+    const response = await client.createVersion(args.org, args.repo, normalizedPath, args.label);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(response, null, 2),
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: formatError(error),
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
+/**
+ * Handler for da_get_version tool
+ */
+export async function handleGetVersion(
+  client: IAdminClient,
+  args: { org: string; repo: string; path: string; versionId: string },
+) {
+  try {
+    const normalizedPath = normalizePagePath(args.path)!;
+    const response = await client.getVersion(args.org, args.repo, normalizedPath, args.versionId);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(response, null, 2),
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: formatError(error),
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
+/**
  * Handler for da_lookup_media tool
  */
 export async function handleLookupMedia(

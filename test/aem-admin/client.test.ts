@@ -175,6 +175,38 @@ describe('AemAdminClient', () => {
     expect(result.versions[0].path).toBe('/docs/a.html');
   });
 
+  it('createVersion POSTs to the .versions endpoint with an optional comment query param', async () => {
+    fetchMock.mockResolvedValue(new Response('', { status: 201, headers: {} }));
+
+    const result = await client.createVersion('acme', 'site1', 'docs/a.html', 'Before redesign');
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://api.aem.live/acme/sites/site1/source/docs/a.html/.versions?comment=Before%20redesign');
+    expect(init.method).toBe('POST');
+    expect(result).toEqual({ success: true, path: 'docs/a.html' });
+  });
+
+  it('createVersion omits the comment query param when no label is given', async () => {
+    fetchMock.mockResolvedValue(new Response('', { status: 201, headers: {} }));
+
+    await client.createVersion('acme', 'site1', 'docs/a.html');
+
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://api.aem.live/acme/sites/site1/source/docs/a.html/.versions');
+  });
+
+  it('getVersion GETs the specific version by id', async () => {
+    fetchMock.mockResolvedValue(new Response('<html>old</html>', {
+      status: 200,
+      headers: { 'content-type': 'text/html' },
+    }));
+
+    const result = await client.getVersion('acme', 'site1', 'docs/a.html', 'v1');
+
+    expect(fetchMock.mock.calls[0][0]).toBe('https://api.aem.live/acme/sites/site1/source/docs/a.html/.versions/v1');
+    expect(result).toBe('<html>old</html>');
+  });
+
   it('lookupMedia returns base64 data and mime type for binary content', async () => {
     fetchMock.mockResolvedValue(
       new Response(new Uint8Array([1, 2, 3]), {

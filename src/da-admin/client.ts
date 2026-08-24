@@ -285,6 +285,42 @@ export class DAAdminClient implements IAdminClient {
   }
 
   /**
+   * Create a snapshot version of the current file state.
+   * See https://docs.da.live/developers/api/version
+   */
+  async createVersion(
+    org: string,
+    repo: string,
+    path: string,
+    label?: string,
+  ): Promise<DAOperationResponse> {
+    const endpoint = `/versionsource/${org}/${repo}/${path}`;
+    await this.request<unknown>(endpoint, {
+      method: 'POST',
+      body: label ? JSON.stringify({ label }) : undefined,
+    });
+    return { success: true, path };
+  }
+
+  /**
+   * Retrieve the content of a specific version. `versionId` must be the
+   * opaque `url` value returned by getVersions() for that version (e.g.
+   * `/versionsource/{org}/{guid}/{guid}.html`) — it is already a full
+   * endpoint path, not a bare identifier to be combined with org/repo/path.
+   */
+  async getVersion(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _org: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _repo: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _path: string,
+    versionId: string,
+  ): Promise<DASourceContent> {
+    return this.request<DASourceContent>(versionId);
+  }
+
+  /**
    * Lookup media — returns binary content as base64 with MIME type
    */
   async lookupMedia(

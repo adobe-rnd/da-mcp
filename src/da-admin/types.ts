@@ -115,6 +115,20 @@ export interface IAdminClient {
     destinationPath: string,
   ): Promise<DAOperationResponse>;
   getVersions(org: string, repo: string, path: string): Promise<DAVersionsResponse>;
+  createVersion(
+    org: string,
+    repo: string,
+    path: string,
+    label?: string,
+  ): Promise<DAOperationResponse>;
+  /**
+   * Retrieve the content of a specific version. `versionId` must be the
+   * identifier returned in the `url` field of a prior getVersions() call —
+   * its shape differs by backend (legacy: an opaque `/versionsource/...`
+   * path; HLX6: a short version id) and is not something a caller should
+   * construct manually.
+   */
+  getVersion(org: string, repo: string, path: string, versionId: string): Promise<DASourceContent>;
   lookupMedia(org: string, repo: string, mediaPath: string): Promise<DAMediaContent>;
   lookupFragment(org: string, repo: string, fragmentPath: string): Promise<DAMediaReference>;
   uploadMedia(

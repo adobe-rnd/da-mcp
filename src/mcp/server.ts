@@ -16,6 +16,8 @@ import {
   handleCopyContent,
   handleMoveContent,
   handleGetVersions,
+  handleCreateVersion,
+  handleGetVersion,
   handleLookupMedia,
   handleUploadMedia,
   handleLookupFragment,
@@ -104,6 +106,31 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       path: z.string().describe('Path to the file'),
     }),
   }, (args) => handleGetVersions(client, args) as Promise<CallToolResult>);
+
+  server.registerTool('da_create_version', {
+    description: 'Create a snapshot version of a source file in a repository. '
+      + 'Versions are also created automatically when a file is updated, so this is '
+      + 'mainly useful to explicitly checkpoint a file before making risky changes.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Site / Repository name'),
+      path: z.string().describe('Path to the file to version'),
+      label: z.string().optional().describe('Optional label for this version (e.g., "Before Migration", "Backup")'),
+    }),
+  }, (args) => handleCreateVersion(client, args) as Promise<CallToolResult>);
+
+  server.registerTool('da_get_version', {
+    description: 'Get the content of a specific version of a source file. '
+      + 'The versionId must be the "url" value for that version from a prior '
+      + 'da_get_versions call — it is an opaque identifier (its exact shape '
+      + 'differs by backend) and should not be constructed manually.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Site / Repository name'),
+      path: z.string().describe('Path to the file'),
+      versionId: z.string().describe('The "url" value for the desired version, from a prior da_get_versions call'),
+    }),
+  }, (args) => handleGetVersion(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_lookup_media', {
     description: 'Lookup media references in a DA repository. Returns information about media assets including URLs and metadata.',

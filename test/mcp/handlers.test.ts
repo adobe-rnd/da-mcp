@@ -10,6 +10,8 @@ import {
   handleCopyContent,
   handleMoveContent,
   handleGetVersions,
+  handleCreateVersion,
+  handleGetVersion,
   handleLookupMedia,
   handleLookupFragment,
   handleUploadMedia,
@@ -71,6 +73,8 @@ describe('Handler path normalization', () => {
       copyContent: vi.fn().mockResolvedValue({ success: true }),
       moveContent: vi.fn().mockResolvedValue({ success: true }),
       getVersions: vi.fn().mockResolvedValue({ versions: [] }),
+      createVersion: vi.fn().mockResolvedValue({ success: true }),
+      getVersion: vi.fn().mockResolvedValue('version content'),
       lookupMedia: vi.fn().mockResolvedValue({ data: 'base64imagedata', mimeType: 'image/png' }),
       lookupFragment: vi.fn().mockResolvedValue({ url: '' }),
       uploadMedia: vi.fn().mockResolvedValue({ success: true }),
@@ -255,6 +259,46 @@ describe('Handler path normalization', () => {
     it('should add .html extension when not provided', async () => {
       await handleGetVersions(mockClient, { org: 'test', repo: 'repo', path: 'docs/page' });
       expect(mockClient.getVersions).toHaveBeenCalledWith('test', 'repo', 'docs/page.html');
+    });
+  });
+
+  describe('handleCreateVersion', () => {
+    it('should normalize path with leading slash', async () => {
+      await handleCreateVersion(mockClient, { org: 'test', repo: 'repo', path: '/docs/file.md' });
+      expect(mockClient.createVersion).toHaveBeenCalledWith('test', 'repo', 'docs/file.md', undefined);
+    });
+
+    it('should add .html extension when not provided', async () => {
+      await handleCreateVersion(mockClient, { org: 'test', repo: 'repo', path: 'docs/page' });
+      expect(mockClient.createVersion).toHaveBeenCalledWith('test', 'repo', 'docs/page.html', undefined);
+    });
+
+    it('should pass through an optional label', async () => {
+      await handleCreateVersion(mockClient, {
+        org: 'test', repo: 'repo', path: 'docs/file.md', label: 'Before redesign',
+      });
+      expect(mockClient.createVersion).toHaveBeenCalledWith('test', 'repo', 'docs/file.md', 'Before redesign');
+    });
+  });
+
+  describe('handleGetVersion', () => {
+    it('should normalize path with leading slash but leave versionId untouched', async () => {
+      await handleGetVersion(mockClient, {
+        org: 'test', repo: 'repo', path: '/docs/file.md', versionId: '/versionsource/test/abc/def.html',
+      });
+      expect(mockClient.getVersion).toHaveBeenCalledWith(
+        'test',
+        'repo',
+        'docs/file.md',
+        '/versionsource/test/abc/def.html',
+      );
+    });
+
+    it('should add .html extension to path when not provided', async () => {
+      await handleGetVersion(mockClient, {
+        org: 'test', repo: 'repo', path: 'docs/page', versionId: 'v1',
+      });
+      expect(mockClient.getVersion).toHaveBeenCalledWith('test', 'repo', 'docs/page.html', 'v1');
     });
   });
 

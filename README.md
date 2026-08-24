@@ -64,6 +64,8 @@ src/
 | `da_copy_content` | Copy content between locations |
 | `da_move_content` | Move content between locations |
 | `da_get_versions` | Get version history for a file |
+| `da_create_version` | Create a snapshot version of a file |
+| `da_get_version` | Get the content of a specific version of a file |
 | `da_lookup_media` | Lookup media references |
 | `da_lookup_fragment` | Lookup fragment references |
 

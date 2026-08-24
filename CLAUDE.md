@@ -67,6 +67,8 @@ All tools accept `org` and `repo` parameters plus operation-specific params:
 | `da_copy_content` | Copy between locations |
 | `da_move_content` | Move between locations |
 | `da_get_versions` | Get version history |
+| `da_create_version` | Create a snapshot version of a file |
+| `da_get_version` | Get the content of a specific version |
 | `da_lookup_media` | Get media asset info |
 | `da_lookup_fragment` | Get fragment info |
 | `da_upload_media` | Upload binary media file |

@@ -63,6 +63,12 @@ export interface DAOperationResponse {
   success: boolean;
   message?: string;
   path?: string;
+  /**
+   * DA editor URL for this document (https://da.live/edit#/{org}/{repo}/{path}),
+   * constructed by createSource/updateSource on both backends — see
+   * utils/path.ts buildEditUrl(). Not populated by other operations.
+   */
+  editUrl?: string;
 }
 
 export interface DAAdminClientOptions {

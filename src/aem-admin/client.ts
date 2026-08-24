@@ -21,6 +21,7 @@ import {
   AemVersionListingEntry,
 } from './types';
 import { mapCopyResponse, mapFolderListing, mapVersionListing } from './mappers';
+import { buildEditUrl } from '../utils/path';
 
 const DEFAULT_BASE_URL = 'https://api.aem.live';
 
@@ -156,7 +157,7 @@ export class AemAdminClient implements IAdminClient {
       body: content,
       headers: { 'Content-Type': contentType },
     });
-    return { success: true, path };
+    return { success: true, path, editUrl: buildEditUrl(org, repo, path) };
   }
 
   async updateSource(
@@ -172,7 +173,7 @@ export class AemAdminClient implements IAdminClient {
       body: content,
       headers: { 'Content-Type': contentType },
     });
-    return { success: true, path };
+    return { success: true, path, editUrl: buildEditUrl(org, repo, path) };
   }
 
   async deleteSource(org: string, repo: string, path: string): Promise<DAOperationResponse> {

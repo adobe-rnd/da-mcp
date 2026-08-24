@@ -84,18 +84,27 @@ describe('AemAdminClient', () => {
     expect(init.method).toBe('POST');
     expect(init.body).toBe('<p>hi</p>');
     expect(init.headers.get('Content-Type')).toBe('text/html');
-    expect(result).toEqual({ success: true, path: 'docs/new.html' });
+    expect(result).toEqual({
+      success: true,
+      path: 'docs/new.html',
+      editUrl: 'https://da.live/edit#/acme/site1/docs/new',
+    });
   });
 
   it('updateSource PUTs the raw content', async () => {
     fetchMock.mockResolvedValue(new Response('', { status: 200, headers: {} }));
 
-    await client.updateSource('acme', 'site1', 'docs/page.html', '<p>updated</p>', 'text/html');
+    const result = await client.updateSource('acme', 'site1', 'docs/page.html', '<p>updated</p>', 'text/html');
 
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe('https://api.aem.live/acme/sites/site1/source/docs/page.html');
     expect(init.method).toBe('PUT');
     expect(init.body).toBe('<p>updated</p>');
+    expect(result).toEqual({
+      success: true,
+      path: 'docs/page.html',
+      editUrl: 'https://da.live/edit#/acme/site1/docs/page',
+    });
   });
 
   it('deleteSource issues a DELETE', async () => {

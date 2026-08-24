@@ -14,6 +14,7 @@ import {
   DAOperationResponse,
   IAdminClient,
 } from './types';
+import { buildEditUrl } from '../utils/path';
 
 export class DAAdminClient implements IAdminClient {
   private apiToken: string;
@@ -191,10 +192,11 @@ export class DAAdminClient implements IAdminClient {
     const formData = new FormData();
     formData.append('data', blob);
 
-    return this.request<DAOperationResponse>(endpoint, {
+    await this.request<unknown>(endpoint, {
       method: 'POST',
       body: formData,
     });
+    return { success: true, path, editUrl: buildEditUrl(org, repo, path) };
   }
 
   /**
@@ -216,10 +218,11 @@ export class DAAdminClient implements IAdminClient {
     const formData = new FormData();
     formData.append('data', blob);
 
-    return this.request<DAOperationResponse>(endpoint, {
+    await this.request<unknown>(endpoint, {
       method: 'POST',
       body: formData,
     });
+    return { success: true, path, editUrl: buildEditUrl(org, repo, path) };
   }
 
   /**

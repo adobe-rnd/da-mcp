@@ -24,8 +24,15 @@ import {
 /**
  * Create and configure MCP server with all DA tools registered
  */
+const INSTRUCTIONS = 'This server manages content on Experience Workspace / Document Authoring (DA) sites. '
+  + 'Every tool requires org and repo (the site\'s organization and repository/site name). '
+  + 'Use da_list_sources to browse folders and files, da_get_source to read a page or file\'s content, '
+  + 'and da_create_source / da_update_source to create or edit pages. '
+  + 'Paths are relative to the site root; a leading slash is optional and stripped automatically, '
+  + 'and a path with no file extension is treated as an HTML page and given a .html extension automatically.';
+
 export function createServer(client: IAdminClient, version: string): McpServer {
-  const server = new McpServer({ name: 'da-live-admin', version });
+  const server = new McpServer({ name: 'da-live-admin', version }, { instructions: INSTRUCTIONS });
 
   server.registerTool('da_list_sources', {
     description: 'List all sources and directories in a DA repository at a given path. Returns a list of files and folders with their metadata.',

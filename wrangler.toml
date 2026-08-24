@@ -8,7 +8,7 @@ services = [
 ]
 
 kv_namespaces = [
-  { binding = "DA_MCP_HLX6_STATUS_KV", id = "50961c168387463ca60e40d8bf625e4a" }
+  { binding = "DA_MCP_HLX6_STATUS_KV", id = "7554dbf3d9204934836a1d387a431192" }
 ]
 
 [vars]
@@ -27,7 +27,7 @@ DA_ADMIN_BASE_URL = "http://localhost:8787"
 [env.ci]
 name = "da-mcp-ci"
 services = [
-  { binding = "daadmin", service = "da-admin" }
+  { binding = "daadmin", service = "da-admin-stage" }
 ]
 kv_namespaces = [
   { binding = "DA_MCP_HLX6_STATUS_KV", id = "7554dbf3d9204934836a1d387a431192" }
@@ -44,7 +44,7 @@ services = [
   { binding = "daadmin", service = "da-admin" }
 ]
 kv_namespaces = [
-  { binding = "DA_MCP_HLX6_STATUS_KV", id = "98a7135afcfa4e1b9fc32a09d2269c98" }
+  { binding = "DA_MCP_HLX6_STATUS_KV", id = "50961c168387463ca60e40d8bf625e4a" }
 ]
 
 [env.production.vars]

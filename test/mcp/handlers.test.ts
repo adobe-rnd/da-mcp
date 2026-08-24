@@ -18,6 +18,46 @@ import {
 // Mock the DA Admin Client
 vi.mock('../../src/da-admin/client');
 
+describe('formatError backend labeling', () => {
+  let mockClient: any;
+
+  beforeEach(() => {
+    mockClient = { getSource: vi.fn() };
+  });
+
+  it('labels errors from the legacy DA Admin backend', async () => {
+    mockClient.getSource.mockRejectedValue({
+      status: 400, message: 'Bad Request', backend: 'da-admin',
+    });
+
+    const result = await handleGetSource(mockClient, { org: 'acme', repo: 'site1', path: 'docs/page.html' });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('DA Admin API Error (400): Bad Request');
+    expect(result.content[0].text).not.toContain('AEM Admin API Error');
+  });
+
+  it('labels errors from the HLX6 AEM Admin backend', async () => {
+    mockClient.getSource.mockRejectedValue({
+      status: 400, message: 'Bad Request', backend: 'aem-admin',
+    });
+
+    const result = await handleGetSource(mockClient, { org: 'acme', repo: 'site1', path: 'docs/page.html' });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('AEM Admin API Error (400): Bad Request');
+  });
+
+  it('falls back to a generic Admin API Error label when backend is unspecified', async () => {
+    mockClient.getSource.mockRejectedValue({ status: 500, message: 'Internal Server Error' });
+
+    const result = await handleGetSource(mockClient, { org: 'acme', repo: 'site1', path: 'docs/page.html' });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Admin API Error (500): Internal Server Error');
+  });
+});
+
 describe('Handler path normalization', () => {
   let mockClient: any;
 

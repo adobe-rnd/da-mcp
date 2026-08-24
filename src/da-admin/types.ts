@@ -75,4 +75,54 @@ export interface DAAPIError {
   status: number;
   message: string;
   details?: any;
+  /**
+   * Which admin backend produced this error. Set by DAAdminClient
+   * ('da-admin') and AemAdminClient ('aem-admin') so formatError() in
+   * src/mcp/handlers.ts can label the error correctly regardless of
+   * which backend an org/repo was routed to.
+   */
+  backend?: 'da-admin' | 'aem-admin';
+}
+
+export interface IAdminClient {
+  listSources(org: string, repo: string, path?: string): Promise<DAListSourcesResponse>;
+  getSource(org: string, repo: string, path: string): Promise<DASourceContent>;
+  createSource(
+    org: string,
+    repo: string,
+    path: string,
+    content: string,
+    contentType?: string,
+  ): Promise<DAOperationResponse>;
+  updateSource(
+    org: string,
+    repo: string,
+    path: string,
+    content: string,
+    contentType?: string,
+  ): Promise<DAOperationResponse>;
+  deleteSource(org: string, repo: string, path: string): Promise<DAOperationResponse>;
+  copyContent(
+    org: string,
+    repo: string,
+    sourcePath: string,
+    destinationPath: string,
+  ): Promise<DAOperationResponse>;
+  moveContent(
+    org: string,
+    repo: string,
+    sourcePath: string,
+    destinationPath: string,
+  ): Promise<DAOperationResponse>;
+  getVersions(org: string, repo: string, path: string): Promise<DAVersionsResponse>;
+  lookupMedia(org: string, repo: string, mediaPath: string): Promise<DAMediaContent>;
+  lookupFragment(org: string, repo: string, fragmentPath: string): Promise<DAMediaReference>;
+  uploadMedia(
+    org: string,
+    repo: string,
+    path: string,
+    base64Data: string,
+    mimeType: string,
+    fileName: string,
+  ): Promise<DAOperationResponse>;
 }

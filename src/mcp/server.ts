@@ -34,6 +34,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       repo: z.string().describe('Repository name (e.g., "my-docs")'),
       path: z.string().optional().describe('Optional path within repository (e.g., "docs/guides"). Leave empty for root.'),
     }),
+    annotations: { readOnlyHint: true },
   }, (args) => handleListSources(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_get_source', {
@@ -43,6 +44,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       repo: z.string().describe('Repository name'),
       path: z.string().describe('Path to the file within the repository (e.g., "docs/index.md")'),
     }),
+    annotations: { readOnlyHint: true },
   }, (args) => handleGetSource(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_create_source', {
@@ -54,6 +56,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       content: z.string().describe('Content of the new file'),
       contentType: z.string().optional().describe('Optional content type (e.g., "text/markdown", "text/html")'),
     }),
+    annotations: { readOnlyHint: false, idempotentHint: false },
   }, (args) => handleCreateSource(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_update_source', {
@@ -65,6 +68,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       content: z.string().describe('New content for the file'),
       contentType: z.string().optional().describe('Optional content type'),
     }),
+    annotations: { readOnlyHint: false, idempotentHint: true },
   }, (args) => handleUpdateSource(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_delete_source', {
@@ -74,6 +78,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       repo: z.string().describe('Repository name'),
       path: z.string().describe('Path to the file to delete'),
     }),
+    annotations: { readOnlyHint: false, idempotentHint: true },
   }, (args) => handleDeleteSource(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_copy_content', {
@@ -84,6 +89,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       sourcePath: z.string().describe('Path to the source file to copy from'),
       destinationPath: z.string().describe('Path where the file should be copied to'),
     }),
+    annotations: { readOnlyHint: false, idempotentHint: false },
   }, (args) => handleCopyContent(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_move_content', {
@@ -94,6 +100,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       sourcePath: z.string().describe('Path to the source file to move from'),
       destinationPath: z.string().describe('Path where the file should be moved to'),
     }),
+    annotations: { readOnlyHint: false, idempotentHint: false },
   }, (args) => handleMoveContent(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_get_versions', {
@@ -103,6 +110,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       repo: z.string().describe('Repository name'),
       path: z.string().describe('Path to the file'),
     }),
+    annotations: { readOnlyHint: true },
   }, (args) => handleGetVersions(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_lookup_media', {
@@ -112,6 +120,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       repo: z.string().describe('Repository name'),
       mediaPath: z.string().describe('Path to the media file'),
     }),
+    annotations: { readOnlyHint: true },
   }, (args) => handleLookupMedia(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_lookup_fragment', {
@@ -121,6 +130,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       repo: z.string().describe('Repository name'),
       fragmentPath: z.string().describe('Path to the fragment'),
     }),
+    annotations: { readOnlyHint: true },
   }, (args) => handleLookupFragment(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_upload_media', {
@@ -142,6 +152,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       mimeType: z.string().describe('MIME type of the file (e.g., "image/png", "image/jpeg")'),
       fileName: z.string().describe('Original filename including extension (e.g., "photo.jpg")'),
     }),
+    annotations: { readOnlyHint: false, idempotentHint: true },
   }, (args) => handleUploadMedia(client, args) as Promise<CallToolResult>);
 
   return server;

@@ -105,6 +105,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       repo: z.string().describe('Repository name'),
       path: z.string().describe('Path to the file'),
     }),
+    annotations: { readOnlyHint: true },
   }, (args) => handleGetVersions(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_create_version', {
@@ -117,6 +118,10 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       path: z.string().describe('Path to the file to version'),
       label: z.string().optional().describe('Optional label for this version (e.g., "Before Migration", "Backup")'),
     }),
+    // destructiveHint: false is honest here (unlike da_create_source) - creating a version
+    // snapshot never overwrites or removes the live document or any other version, on either
+    // backend.
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
   }, (args) => handleCreateVersion(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_get_version', {
@@ -130,6 +135,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       path: z.string().describe('Path to the file'),
       versionId: z.string().describe('The "url" value for the desired version, from a prior da_get_versions call'),
     }),
+    annotations: { readOnlyHint: true },
   }, (args) => handleGetVersion(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_lookup_media', {

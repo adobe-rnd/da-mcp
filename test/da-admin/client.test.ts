@@ -155,4 +155,18 @@ describe('DAAdminClient.getFlags', () => {
 
     expect(flags).toEqual({});
   });
+
+  it('does not log a noisy error block for the expected 404 (config-probe log noise)', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const daadminService = createFakeDaadminService(new Response('', { status: 404, headers: {} }));
+    const client = new DAAdminClient({ apiToken: 'token', daadminService });
+
+    await client.getFlags('acme', 'site1');
+
+    const errorLines = logSpy.mock.calls.filter((call) => (
+      call[0] === 'DA Admin API Error:' || call[0] === 'DA Admin API Request Failed:'
+    ));
+    expect(errorLines).toHaveLength(0);
+    logSpy.mockRestore();
+  });
 });

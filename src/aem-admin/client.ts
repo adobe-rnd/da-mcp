@@ -45,9 +45,9 @@ export class AemAdminClient implements IAdminClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit & { binary?: boolean } = {},
+    options: RequestInit & { binary?: boolean; quiet404?: boolean } = {},
   ): Promise<T> {
-    const { binary, ...requestOptions } = options;
+    const { binary, quiet404, ...requestOptions } = options;
     const headers = new Headers(requestOptions.headers || {});
     headers.set('Authorization', `Bearer ${this.apiToken}`);
     const method = requestOptions.method || 'GET';
@@ -93,7 +93,9 @@ export class AemAdminClient implements IAdminClient {
         } catch {
           // response body was not JSON, keep statusText
         }
-        console.log('AEM Admin API Error:', JSON.stringify(error, null, 2));
+        if (!(quiet404 && response.status === 404)) {
+          console.log('AEM Admin API Error:', JSON.stringify(error, null, 2));
+        }
         throw error;
       }
 
@@ -127,7 +129,11 @@ export class AemAdminClient implements IAdminClient {
         timeoutError.backend = 'aem-admin';
         throw timeoutError;
       }
-      console.log('AEM Admin API Request Failed:', error);
+      const isQuiet404 = quiet404 && typeof error === 'object' && error !== null
+        && (error as DAAPIError).status === 404;
+      if (!isQuiet404) {
+        console.log('AEM Admin API Request Failed:', error);
+      }
       throw error;
     }
   }
@@ -233,7 +239,9 @@ export class AemAdminClient implements IAdminClient {
   async getFlags(org: string, repo: string): Promise<Record<string, string>> {
     const endpoint = `/${org}/sites/${repo}/config/editor/da.json`;
     try {
-      const raw = await this.request<AemFlagsConfig>(endpoint);
+      // quiet404: most orgs won't have a flags config sheet at all, so a 404 here is
+      // expected/common, not worth logging a full error block for on every create/update.
+      const raw = await this.request<AemFlagsConfig>(endpoint, { quiet404: true });
       return rowsToMap(raw.flags ?? []);
     } catch {
       return {};

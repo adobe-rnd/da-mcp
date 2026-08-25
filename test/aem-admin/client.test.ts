@@ -355,4 +355,17 @@ describe('AemAdminClient.getFlags', () => {
 
     expect(flags).toEqual({});
   });
+
+  it('does not log a noisy error block for the expected 404 (config-probe log noise)', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    fetchMock.mockResolvedValue(new Response('', { status: 404, headers: {} }));
+
+    await client.getFlags('acme', 'site1');
+
+    const errorLines = logSpy.mock.calls.filter((call) => (
+      call[0] === 'AEM Admin API Error:' || call[0] === 'AEM Admin API Request Failed:'
+    ));
+    expect(errorLines).toHaveLength(0);
+    logSpy.mockRestore();
+  });
 });

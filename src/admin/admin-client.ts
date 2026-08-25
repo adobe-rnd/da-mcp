@@ -90,6 +90,27 @@ export class AdminClient implements IAdminClient {
     return buildDaUrl(org, repo, path, ewEnabled ? 'canvas' : 'edit');
   }
 
+  /**
+   * Overrides result.editUrl with the sheet#/canvas#-aware URL, but never
+   * lets a failure here (e.g. a transient KV error inside isHlx6, called
+   * again here for the EW check) fail the whole call — the write itself
+   * has already succeeded by this point, so on any error we just keep the
+   * underlying client's own plain edit# URL instead of throwing.
+   */
+  private async withResolvedEditUrl(
+    result: DAOperationResponse,
+    org: string,
+    repo: string,
+    path: string,
+  ): Promise<DAOperationResponse> {
+    try {
+      return { ...result, editUrl: await this.resolveAuthoringUrl(org, repo, path) };
+    } catch (error) {
+      console.log('AdminClient: resolveAuthoringUrl failed, keeping the default editUrl:', error);
+      return result;
+    }
+  }
+
   async listSources(org: string, repo: string, path?: string): Promise<DAListSourcesResponse> {
     const client = await this.pickClient(org, repo);
     return client.listSources(org, repo, path as string);
@@ -109,7 +130,7 @@ export class AdminClient implements IAdminClient {
   ): Promise<DAOperationResponse> {
     const client = await this.pickClient(org, repo);
     const result = await client.createSource(org, repo, path, content, contentType);
-    return { ...result, editUrl: await this.resolveAuthoringUrl(org, repo, path) };
+    return this.withResolvedEditUrl(result, org, repo, path);
   }
 
   async updateSource(
@@ -121,7 +142,7 @@ export class AdminClient implements IAdminClient {
   ): Promise<DAOperationResponse> {
     const client = await this.pickClient(org, repo);
     const result = await client.updateSource(org, repo, path, content, contentType);
-    return { ...result, editUrl: await this.resolveAuthoringUrl(org, repo, path) };
+    return this.withResolvedEditUrl(result, org, repo, path);
   }
 
   async deleteSource(org: string, repo: string, path: string): Promise<DAOperationResponse> {

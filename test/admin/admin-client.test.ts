@@ -206,4 +206,23 @@ describe('AdminClient editUrl resolution', () => {
 
     expect(result.editUrl).toBe('https://da.live/canvas#/acme/site1/docs/page');
   });
+
+  it('does not fail the whole call when resolving the authoring URL fails after a successful write', async () => {
+    // First isHlx6 call (inside pickClient, for the write itself) succeeds; the second
+    // (inside resolveAuthoringUrl's EW check, e.g. a transient KV error) fails. The write
+    // already succeeded by then, so this must not surface as a tool error.
+    isHlx6Mock.mockResolvedValueOnce(false).mockRejectedValueOnce(new Error('KV unavailable'));
+
+    const result = await client.createSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
+
+    expect(result).toEqual({ success: true, path: 'legacy' });
+  });
+
+  it('does the same for updateSource', async () => {
+    isHlx6Mock.mockResolvedValueOnce(false).mockRejectedValueOnce(new Error('KV unavailable'));
+
+    const result = await client.updateSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
+
+    expect(result).toEqual({ success: true, path: 'legacy' });
+  });
 });

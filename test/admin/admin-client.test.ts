@@ -156,6 +156,28 @@ describe('AdminClient editUrl resolution', () => {
     expect(result.editUrl).toBe('https://da.live/edit#/acme/site1/docs/page');
   });
 
+  it('probes isHlx6 only once per createSource call, not once for routing and again for the EW check', async () => {
+    await client.createSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
+
+    expect(isHlx6Mock).toHaveBeenCalledTimes(1);
+  });
+
+  it('probes isHlx6 only once per updateSource call', async () => {
+    await client.updateSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
+
+    expect(isHlx6Mock).toHaveBeenCalledTimes(1);
+  });
+
+  it('reuses the single isHlx6 result for both routing and the EW site-flags fetch when HLX6', async () => {
+    isHlx6Mock.mockResolvedValue(true);
+
+    await client.createSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
+
+    expect(isHlx6Mock).toHaveBeenCalledTimes(1);
+    expect(aemMethods.getFlags).toHaveBeenCalledWith('acme', 'site1');
+    expect(legacyMethods.getFlags).not.toHaveBeenCalledWith('acme', 'site1');
+  });
+
   it('uses canvas# when the site-level ew.enabled flag is true', async () => {
     legacyMethods.getFlags.mockImplementation(async (org: string, repo?: string) => (
       repo ? { 'ew.enabled': 'true' } : {}
@@ -208,10 +230,10 @@ describe('AdminClient editUrl resolution', () => {
   });
 
   it('does not fail the whole call when resolving the authoring URL fails after a successful write', async () => {
-    // First isHlx6 call (inside pickClient, for the write itself) succeeds; the second
-    // (inside resolveAuthoringUrl's EW check, e.g. a transient KV error) fails. The write
-    // already succeeded by then, so this must not surface as a tool error.
-    isHlx6Mock.mockResolvedValueOnce(false).mockRejectedValueOnce(new Error('KV unavailable'));
+    // isHlx6 itself is no longer a viable failure point here (it's resolved once, before the
+    // write, in resolveClient - a failure there fails before any write happens). This defends
+    // against any other unexpected failure inside resolveAuthoringUrl (e.g. a bug in getFlags).
+    legacyMethods.getFlags.mockRejectedValueOnce(new Error('unexpected failure'));
 
     const result = await client.createSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
 
@@ -219,7 +241,7 @@ describe('AdminClient editUrl resolution', () => {
   });
 
   it('does the same for updateSource', async () => {
-    isHlx6Mock.mockResolvedValueOnce(false).mockRejectedValueOnce(new Error('KV unavailable'));
+    legacyMethods.getFlags.mockRejectedValueOnce(new Error('unexpected failure'));
 
     const result = await client.updateSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
 

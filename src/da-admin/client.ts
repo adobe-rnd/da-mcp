@@ -14,6 +14,11 @@ import {
   DAOperationResponse,
   IAdminClient,
 } from './types';
+import { buildEditUrl } from '../utils/path';
+
+interface DASourceResponse {
+  aem?: { previewUrl?: string; liveUrl?: string };
+}
 
 export class DAAdminClient implements IAdminClient {
   private apiToken: string;
@@ -191,10 +196,17 @@ export class DAAdminClient implements IAdminClient {
     const formData = new FormData();
     formData.append('data', blob);
 
-    return this.request<DAOperationResponse>(endpoint, {
+    const response = await this.request<DASourceResponse>(endpoint, {
       method: 'POST',
       body: formData,
     });
+    return {
+      success: true,
+      path,
+      editUrl: buildEditUrl(org, repo, path),
+      previewUrl: response?.aem?.previewUrl,
+      liveUrl: response?.aem?.liveUrl,
+    };
   }
 
   /**
@@ -216,10 +228,17 @@ export class DAAdminClient implements IAdminClient {
     const formData = new FormData();
     formData.append('data', blob);
 
-    return this.request<DAOperationResponse>(endpoint, {
+    const response = await this.request<DASourceResponse>(endpoint, {
       method: 'POST',
       body: formData,
     });
+    return {
+      success: true,
+      path,
+      editUrl: buildEditUrl(org, repo, path),
+      previewUrl: response?.aem?.previewUrl,
+      liveUrl: response?.aem?.liveUrl,
+    };
   }
 
   /**

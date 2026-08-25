@@ -82,7 +82,7 @@ export class AdminClient implements IAdminClient {
    * Experience Workspace canvas editor if enabled for this org/repo,
    * falling back to the default document editor.
    */
-  private async resolveDaUrl(org: string, repo: string, path: string): Promise<string> {
+  private async resolveAuthoringUrl(org: string, repo: string, path: string): Promise<string> {
     if (path.toLowerCase().endsWith('.json')) {
       return buildDaUrl(org, repo, path, 'sheet');
     }
@@ -109,7 +109,7 @@ export class AdminClient implements IAdminClient {
   ): Promise<DAOperationResponse> {
     const client = await this.pickClient(org, repo);
     const result = await client.createSource(org, repo, path, content, contentType);
-    return { ...result, editUrl: await this.resolveDaUrl(org, repo, path) };
+    return { ...result, editUrl: await this.resolveAuthoringUrl(org, repo, path) };
   }
 
   async updateSource(
@@ -121,7 +121,7 @@ export class AdminClient implements IAdminClient {
   ): Promise<DAOperationResponse> {
     const client = await this.pickClient(org, repo);
     const result = await client.updateSource(org, repo, path, content, contentType);
-    return { ...result, editUrl: await this.resolveDaUrl(org, repo, path) };
+    return { ...result, editUrl: await this.resolveAuthoringUrl(org, repo, path) };
   }
 
   async deleteSource(org: string, repo: string, path: string): Promise<DAOperationResponse> {

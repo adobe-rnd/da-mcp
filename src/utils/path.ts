@@ -59,7 +59,7 @@ function stripFileExtension(path: string): string {
   return `${dir}${nameWithoutExtension}`;
 }
 
-export type DaUrlMode = 'edit' | 'sheet' | 'canvas';
+export type AuthorUrlMode = 'edit' | 'sheet' | 'canvas';
 
 /**
  * Builds a da.live hash-route URL for a source path (the extension is
@@ -75,7 +75,7 @@ export type DaUrlMode = 'edit' | 'sheet' | 'canvas';
  * @example
  * buildDaUrl('acme', 'site1', 'docs/page.html', 'edit') // 'https://da.live/edit#/acme/site1/docs/page'
  */
-export function buildDaUrl(org: string, repo: string, path: string, mode: DaUrlMode): string {
+export function buildDaUrl(org: string, repo: string, path: string, mode: AuthorUrlMode): string {
   return `https://da.live/${mode}#/${org}/${repo}/${stripFileExtension(path)}`;
 }
 

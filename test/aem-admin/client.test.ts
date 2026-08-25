@@ -207,6 +207,19 @@ describe('AemAdminClient', () => {
     expect(result).toBe('<html>old</html>');
   });
 
+  it('getVersion URL-encodes the versionId', async () => {
+    fetchMock.mockResolvedValue(new Response('<html>old</html>', {
+      status: 200,
+      headers: { 'content-type': 'text/html' },
+    }));
+
+    await client.getVersion('acme', 'site1', 'docs/a.html', 'v1/with a space?&');
+
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      'https://api.aem.live/acme/sites/site1/source/docs/a.html/.versions/v1%2Fwith%20a%20space%3F%26',
+    );
+  });
+
   it('lookupMedia returns base64 data and mime type for binary content', async () => {
     fetchMock.mockResolvedValue(
       new Response(new Uint8Array([1, 2, 3]), {

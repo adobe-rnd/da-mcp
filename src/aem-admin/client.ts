@@ -228,7 +228,7 @@ export class AemAdminClient implements IAdminClient {
     path: string,
     versionId: string,
   ): Promise<DASourceContent> {
-    const endpoint = `/${org}/sites/${repo}/source/${path}/.versions/${versionId}`;
+    const endpoint = `/${org}/sites/${repo}/source/${path}/.versions/${encodeURIComponent(versionId)}`;
     return this.request<DASourceContent>(endpoint);
   }
 

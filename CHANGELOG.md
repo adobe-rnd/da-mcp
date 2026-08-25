@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/adobe-rnd/da-mcp/compare/v1.4.0...v1.5.0) (2026-08-25)
+
+
+### Features
+
+* add server-level instructions describing the CMS tools ([277b4e1](https://github.com/adobe-rnd/da-mcp/commit/277b4e10a1f46817da99e81b4ad6c12e2087fb12))
+
 # [1.4.0](https://github.com/adobe-rnd/da-mcp/compare/v1.3.0...v1.4.0) (2026-08-24)
 
 

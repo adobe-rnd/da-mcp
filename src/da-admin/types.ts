@@ -69,6 +69,15 @@ export interface DAOperationResponse {
    * utils/path.ts buildEditUrl(). Not populated by other operations.
    */
   editUrl?: string;
+  /**
+   * AEM Edge Delivery preview/live URLs for this document. On the legacy
+   * backend these are parsed from the real admin.da.live response
+   * (aem.previewUrl / aem.liveUrl); on HLX6 (whose create/update responses
+   * don't include them) they're computed with the same URL pattern — see
+   * utils/path.ts buildAemUrls(). Not populated by other operations.
+   */
+  previewUrl?: string;
+  liveUrl?: string;
 }
 
 export interface DAAdminClientOptions {

@@ -88,6 +88,8 @@ describe('AemAdminClient', () => {
       success: true,
       path: 'docs/new.html',
       editUrl: 'https://da.live/edit#/acme/site1/docs/new',
+      previewUrl: 'https://main--site1--acme.aem.page/docs/new',
+      liveUrl: 'https://main--site1--acme.aem.live/docs/new',
     });
   });
 
@@ -104,6 +106,8 @@ describe('AemAdminClient', () => {
       success: true,
       path: 'docs/page.html',
       editUrl: 'https://da.live/edit#/acme/site1/docs/page',
+      previewUrl: 'https://main--site1--acme.aem.page/docs/page',
+      liveUrl: 'https://main--site1--acme.aem.live/docs/page',
     });
   });
 

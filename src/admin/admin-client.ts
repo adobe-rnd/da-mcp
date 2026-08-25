@@ -119,6 +119,26 @@ export class AdminClient implements IAdminClient {
     return client.getVersions(org, repo, path);
   }
 
+  async createVersion(
+    org: string,
+    repo: string,
+    path: string,
+    label?: string,
+  ): Promise<DAOperationResponse> {
+    const client = await this.pickClient(org, repo);
+    return client.createVersion(org, repo, path, label);
+  }
+
+  async getVersion(
+    org: string,
+    repo: string,
+    path: string,
+    versionId: string,
+  ): Promise<DASourceContent> {
+    const client = await this.pickClient(org, repo);
+    return client.getVersion(org, repo, path, versionId);
+  }
+
   async lookupMedia(org: string, repo: string, mediaPath: string): Promise<DAMediaContent> {
     const client = await this.pickClient(org, repo);
     return client.lookupMedia(org, repo, mediaPath);

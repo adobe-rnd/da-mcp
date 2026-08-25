@@ -215,6 +215,28 @@ export class AemAdminClient implements IAdminClient {
     return mapVersionListing(raw);
   }
 
+  async createVersion(
+    org: string,
+    repo: string,
+    path: string,
+    label?: string,
+  ): Promise<DAOperationResponse> {
+    const comment = label ? `?comment=${encodeURIComponent(label)}` : '';
+    const endpoint = `/${org}/sites/${repo}/source/${path}/.versions${comment}`;
+    await this.request<unknown>(endpoint, { method: 'POST' });
+    return { success: true, path };
+  }
+
+  async getVersion(
+    org: string,
+    repo: string,
+    path: string,
+    versionId: string,
+  ): Promise<DASourceContent> {
+    const endpoint = `/${org}/sites/${repo}/source/${path}/.versions/${encodeURIComponent(versionId)}`;
+    return this.request<DASourceContent>(endpoint);
+  }
+
   async lookupMedia(org: string, repo: string, mediaPath: string): Promise<DAMediaContent> {
     const endpoint = `/${org}/sites/${repo}/source/${mediaPath}`;
     return this.request<DAMediaContent>(endpoint, { binary: true });

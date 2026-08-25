@@ -106,17 +106,26 @@ describe('mapVersionListing', () => {
         {
           timestamp: new Date('2021-06-01T00:00:00.000Z').getTime(),
           path: '/docs/page.html',
+          url: 'v1',
           users: [{ email: 'user@example.com' }],
         },
       ],
     });
   });
 
+  it('leaves url undefined when the entry has no version identifier', () => {
+    const result = mapVersionListing([{ 'doc-path-hint': '/docs/page.html' }]);
+
+    expect(result.versions[0].url).toBeUndefined();
+  });
+
   it('handles entries missing optional fields', () => {
     const result = mapVersionListing([{}]);
 
     expect(result).toEqual({
-      versions: [{ timestamp: 0, path: '', users: [] }],
+      versions: [{
+        timestamp: 0, path: '', url: undefined, users: [],
+      }],
     });
   });
 });

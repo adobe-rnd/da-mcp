@@ -304,6 +304,47 @@ export class DAAdminClient implements IAdminClient {
   }
 
   /**
+   * Create a snapshot version of the current file state.
+   * See https://docs.da.live/developers/api/version
+   */
+  async createVersion(
+    org: string,
+    repo: string,
+    path: string,
+    label?: string,
+  ): Promise<DAOperationResponse> {
+    const endpoint = `/versionsource/${org}/${repo}/${path}`;
+    // admin.da.live rejects a body-less request despite its docs describing the label as
+    // optional (confirmed against a real instance) - default to a timestamp-based label
+    // when the caller doesn't supply one. The exact text of an auto-generated label doesn't
+    // matter, so a simple timestamp is enough; this default is legacy-only, HLX6 accepts
+    // version creation with no comment at all.
+    await this.request<unknown>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify({ label: label || `Version ${Date.now()}` }),
+    });
+    return { success: true, path };
+  }
+
+  /**
+   * Retrieve the content of a specific version. `versionId` must be the
+   * opaque `url` value returned by getVersions() for that version (e.g.
+   * `/versionsource/{org}/{guid}/{guid}.html`) — it is already a full
+   * endpoint path, not a bare identifier to be combined with org/repo/path.
+   */
+  async getVersion(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _org: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _repo: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _path: string,
+    versionId: string,
+  ): Promise<DASourceContent> {
+    return this.request<DASourceContent>(versionId);
+  }
+
+  /**
    * Lookup media — returns binary content as base64 with MIME type
    */
   async lookupMedia(

@@ -295,9 +295,14 @@ export class DAAdminClient implements IAdminClient {
     label?: string,
   ): Promise<DAOperationResponse> {
     const endpoint = `/versionsource/${org}/${repo}/${path}`;
+    // admin.da.live rejects a body-less request despite its docs describing the label as
+    // optional (confirmed against a real instance) - default to a timestamp-based label
+    // when the caller doesn't supply one. The exact text of an auto-generated label doesn't
+    // matter, so a simple timestamp is enough; this default is legacy-only, HLX6 accepts
+    // version creation with no comment at all.
     await this.request<unknown>(endpoint, {
       method: 'POST',
-      body: label ? JSON.stringify({ label }) : undefined,
+      body: JSON.stringify({ label: label || `Version ${Date.now()}` }),
     });
     return { success: true, path };
   }

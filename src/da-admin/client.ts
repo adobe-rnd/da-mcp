@@ -15,9 +15,23 @@ import {
   IAdminClient,
 } from './types';
 import { buildEditUrl } from '../utils/path';
+import { FlagRow, rowsToMap } from '../utils/flags';
 
 interface DASourceResponse {
   aem?: { previewUrl?: string; liveUrl?: string };
+}
+
+interface DASheetConfig {
+  ':type'?: 'sheet' | 'multi-sheet';
+  ':sheetname'?: string;
+  data?: FlagRow[];
+  flags?: { data?: FlagRow[] };
+}
+
+function extractFlagsRows(raw: DASheetConfig): FlagRow[] {
+  if (raw[':type'] === 'multi-sheet') return raw.flags?.data ?? [];
+  if (raw[':type'] === 'sheet' && raw[':sheetname'] === 'flags') return raw.data ?? [];
+  return [];
 }
 
 export class DAAdminClient implements IAdminClient {
@@ -301,6 +315,24 @@ export class DAAdminClient implements IAdminClient {
   ): Promise<DAVersionsResponse> {
     const endpoint = `/versionlist/${org}/${repo}/${path}`;
     return this.request<DAVersionsResponse>(endpoint);
+  }
+
+  /**
+   * Fetches the org/site config's 'flags' sheet as a plain key/value map
+   * (e.g. used to check the 'ew.enabled' Experience Workspace flag). Not
+   * part of IAdminClient — an internal capability, not an MCP tool.
+   * Pass only `org` for the org-level config, or `org` + `repo` for the
+   * site-level config. Returns {} if the config or the flags sheet
+   * doesn't exist (a common, expected case, not an error).
+   */
+  async getFlags(org: string, repo?: string): Promise<Record<string, string>> {
+    const endpoint = repo ? `/config/${org}/${repo}/` : `/config/${org}/`;
+    try {
+      const raw = await this.request<DASheetConfig>(endpoint);
+      return rowsToMap(extractFlagsRows(raw));
+    } catch {
+      return {};
+    }
   }
 
   /**

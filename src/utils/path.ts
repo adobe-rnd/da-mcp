@@ -59,19 +59,38 @@ function stripFileExtension(path: string): string {
   return `${dir}${nameWithoutExtension}`;
 }
 
+export type DaUrlMode = 'edit' | 'sheet' | 'canvas';
+
 /**
- * Builds the DA editor URL for a source path, per DA's own convention
- * (the extension is dropped from the hash-route path). This is the same
- * editUrl legacy admin.da.live returns on its own /source create/update
- * responses (see docs.da.live/developers/api/source) — constructed
- * directly here so it's available consistently regardless of which
- * backend (legacy or HLX6) actually served the create/update request.
+ * Builds a da.live hash-route URL for a source path (the extension is
+ * dropped from the hash-route path, matching DA's own convention). The
+ * mode selects which DA app opens the path:
+ * - 'edit': the default document editor (this is the same editUrl legacy
+ *   admin.da.live returns on its own /source create/update responses —
+ *   see docs.da.live/developers/api/source).
+ * - 'sheet': the spreadsheet editor, for .json sheet documents.
+ * - 'canvas': the Experience Workspace canvas editor, for org/repos that
+ *   have the `ew.enabled` config flag set.
+ *
+ * @example
+ * buildDaUrl('acme', 'site1', 'docs/page.html', 'edit') // 'https://da.live/edit#/acme/site1/docs/page'
+ */
+export function buildDaUrl(org: string, repo: string, path: string, mode: DaUrlMode): string {
+  return `https://da.live/${mode}#/${org}/${repo}/${stripFileExtension(path)}`;
+}
+
+/**
+ * Builds the default DA editor URL for a source path. Equivalent to
+ * buildDaUrl(org, repo, path, 'edit') — kept as a separate named export
+ * since it's the common case used directly by DAAdminClient/AemAdminClient
+ * (which don't know about sheet/canvas routing — that's decided by
+ * AdminClient, which has access to the org/repo's config).
  *
  * @example
  * buildEditUrl('acme', 'site1', 'docs/page.html') // 'https://da.live/edit#/acme/site1/docs/page'
  */
 export function buildEditUrl(org: string, repo: string, path: string): string {
-  return `https://da.live/edit#/${org}/${repo}/${stripFileExtension(path)}`;
+  return buildDaUrl(org, repo, path, 'edit');
 }
 
 /**

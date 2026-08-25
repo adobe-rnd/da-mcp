@@ -17,6 +17,7 @@ import {
   IAdminClient,
 } from '../da-admin/types';
 import { isHlx6 } from './detect';
+import { buildDaUrl } from '../utils/path';
 
 export interface AdminClientOptions {
   apiToken: string;
@@ -57,6 +58,38 @@ export class AdminClient implements IAdminClient {
     return hlx6 ? this.aem : this.legacy;
   }
 
+  /**
+   * Checks the org/site config's 'flags' sheet for `ew.enabled === 'true'`
+   * (Experience Workspace), merging org-level and site-level flags with
+   * site taking precedence — matching da-nx's own ewFlags.js convention.
+   * Org-level flags always come from the legacy backend (there's no site
+   * to probe HLX6 status with at the org level); site-level flags are
+   * routed the same way as every other call. Not cached: this is a fresh
+   * config fetch on every call.
+   */
+  private async isExperienceWorkspaceEnabled(org: string, repo: string): Promise<boolean> {
+    const hlx6 = await isHlx6(org, repo, this.kv, { pingBaseUrl: this.hlxAdminBaseUrl });
+    const [orgFlags, siteFlags] = await Promise.all([
+      this.legacy.getFlags(org),
+      hlx6 ? this.aem.getFlags(org, repo) : this.legacy.getFlags(org, repo),
+    ]);
+    return { ...orgFlags, ...siteFlags }['ew.enabled'] === 'true';
+  }
+
+  /**
+   * Resolves the da.live URL to return as editUrl for a create/update
+   * result: .json paths always open in the sheet editor; otherwise the
+   * Experience Workspace canvas editor if enabled for this org/repo,
+   * falling back to the default document editor.
+   */
+  private async resolveDaUrl(org: string, repo: string, path: string): Promise<string> {
+    if (path.toLowerCase().endsWith('.json')) {
+      return buildDaUrl(org, repo, path, 'sheet');
+    }
+    const ewEnabled = await this.isExperienceWorkspaceEnabled(org, repo);
+    return buildDaUrl(org, repo, path, ewEnabled ? 'canvas' : 'edit');
+  }
+
   async listSources(org: string, repo: string, path?: string): Promise<DAListSourcesResponse> {
     const client = await this.pickClient(org, repo);
     return client.listSources(org, repo, path as string);
@@ -75,7 +108,8 @@ export class AdminClient implements IAdminClient {
     contentType?: string,
   ): Promise<DAOperationResponse> {
     const client = await this.pickClient(org, repo);
-    return client.createSource(org, repo, path, content, contentType);
+    const result = await client.createSource(org, repo, path, content, contentType);
+    return { ...result, editUrl: await this.resolveDaUrl(org, repo, path) };
   }
 
   async updateSource(
@@ -86,7 +120,8 @@ export class AdminClient implements IAdminClient {
     contentType?: string,
   ): Promise<DAOperationResponse> {
     const client = await this.pickClient(org, repo);
-    return client.updateSource(org, repo, path, content, contentType);
+    const result = await client.updateSource(org, repo, path, content, contentType);
+    return { ...result, editUrl: await this.resolveDaUrl(org, repo, path) };
   }
 
   async deleteSource(org: string, repo: string, path: string): Promise<DAOperationResponse> {

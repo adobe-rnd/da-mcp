@@ -310,3 +310,49 @@ describe('AemAdminClient', () => {
     });
   });
 });
+
+describe('AemAdminClient.getFlags', () => {
+  let fetchMock: ReturnType<typeof vi.fn>;
+  let client: AemAdminClient;
+
+  beforeEach(() => {
+    fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    client = new AemAdminClient({ apiToken: 'test-token' });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('extracts flags rows from the plain-object config response', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({
+      flags: [{ key: 'ew.enabled', value: 'true' }],
+      prompts: [],
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+
+    const flags = await client.getFlags('acme', 'site1');
+
+    expect(fetchMock.mock.calls[0][0]).toBe('https://api.aem.live/acme/sites/site1/config/editor/da.json');
+    expect(flags).toEqual({ 'ew.enabled': 'true' });
+  });
+
+  it('returns an empty map when there is no flags field', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ prompts: [] }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    }));
+
+    const flags = await client.getFlags('acme', 'site1');
+
+    expect(flags).toEqual({});
+  });
+
+  it('returns an empty map when the config does not exist (404)', async () => {
+    fetchMock.mockResolvedValue(new Response('', { status: 404, headers: {} }));
+
+    const flags = await client.getFlags('acme', 'site1');
+
+    expect(flags).toEqual({});
+  });
+});

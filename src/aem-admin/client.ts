@@ -22,6 +22,11 @@ import {
 } from './types';
 import { mapCopyResponse, mapFolderListing, mapVersionListing } from './mappers';
 import { buildEditUrl, buildAemUrls } from '../utils/path';
+import { rowsToMap } from '../utils/flags';
+
+interface AemFlagsConfig {
+  flags?: { key: string; value: string }[];
+}
 
 const DEFAULT_BASE_URL = 'https://api.aem.live';
 
@@ -213,6 +218,26 @@ export class AemAdminClient implements IAdminClient {
     const endpoint = `/${org}/sites/${repo}/source/${path}/.versions`;
     const raw = await this.request<AemVersionListingEntry[]>(endpoint);
     return mapVersionListing(raw);
+  }
+
+  /**
+   * Fetches the site config's 'flags' field as a plain key/value map (e.g.
+   * used to check the 'ew.enabled' Experience Workspace flag). Not part
+   * of IAdminClient — an internal capability, not an MCP tool. Unlike
+   * DAAdminClient there is no org-only variant here — org-level Experience
+   * Workspace checks always go through the legacy backend (see
+   * AdminClient), matching da-nx's own convention since there's no site
+   * to route by. Returns {} if the config or the flags field doesn't
+   * exist (a common, expected case, not an error).
+   */
+  async getFlags(org: string, repo: string): Promise<Record<string, string>> {
+    const endpoint = `/${org}/sites/${repo}/config/editor/da.json`;
+    try {
+      const raw = await this.request<AemFlagsConfig>(endpoint);
+      return rowsToMap(raw.flags ?? []);
+    } catch {
+      return {};
+    }
   }
 
   async createVersion(

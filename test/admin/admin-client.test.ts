@@ -21,6 +21,7 @@ const legacyMethods = {
   lookupMedia: vi.fn().mockResolvedValue({ data: '', mimeType: 'image/png' }),
   lookupFragment: vi.fn().mockResolvedValue({ path: 'legacy', url: '' }),
   uploadMedia: vi.fn().mockResolvedValue({ success: true, path: 'legacy' }),
+  getFlags: vi.fn().mockResolvedValue({}),
 };
 
 const aemMethods = {
@@ -39,6 +40,7 @@ const aemMethods = {
   lookupMedia: vi.fn().mockResolvedValue({ data: '', mimeType: 'image/png' }),
   lookupFragment: vi.fn().mockResolvedValue({ path: 'aem', url: '' }),
   uploadMedia: vi.fn().mockResolvedValue({ success: true, path: 'aem' }),
+  getFlags: vi.fn().mockResolvedValue({}),
 };
 
 vi.mock('../../src/da-admin/client', () => ({
@@ -123,5 +125,85 @@ describe('AdminClient', () => {
     expect(isHlx6Mock).toHaveBeenCalledWith('acme', 'site1', kv, {
       pingBaseUrl: 'https://custom.example.com',
     });
+  });
+});
+
+describe('AdminClient editUrl resolution', () => {
+  let client: AdminClient;
+  const kv = { get: vi.fn(), put: vi.fn() } as any;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    legacyMethods.getFlags.mockResolvedValue({});
+    aemMethods.getFlags.mockResolvedValue({});
+    isHlx6Mock.mockResolvedValue(false);
+    client = new AdminClient({
+      apiToken: 'token', daadminService: {} as any, kv,
+    });
+  });
+
+  it('always uses sheet# for a .json path, regardless of EW status', async () => {
+    legacyMethods.getFlags.mockResolvedValue({ 'ew.enabled': 'true' });
+
+    const result = await client.createSource('acme', 'site1', 'data/config.json', '{}', 'application/json');
+
+    expect(result.editUrl).toBe('https://da.live/sheet#/acme/site1/data/config');
+  });
+
+  it('uses edit# when Experience Workspace is not enabled', async () => {
+    const result = await client.createSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
+
+    expect(result.editUrl).toBe('https://da.live/edit#/acme/site1/docs/page');
+  });
+
+  it('uses canvas# when the site-level ew.enabled flag is true', async () => {
+    legacyMethods.getFlags.mockImplementation(async (org: string, repo?: string) => (
+      repo ? { 'ew.enabled': 'true' } : {}
+    ));
+
+    const result = await client.updateSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
+
+    expect(result.editUrl).toBe('https://da.live/canvas#/acme/site1/docs/page');
+  });
+
+  it('uses canvas# when only the org-level ew.enabled flag is true', async () => {
+    legacyMethods.getFlags.mockImplementation(async (org: string, repo?: string) => (
+      repo ? {} : { 'ew.enabled': 'true' }
+    ));
+
+    const result = await client.createSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
+
+    expect(result.editUrl).toBe('https://da.live/canvas#/acme/site1/docs/page');
+  });
+
+  it('site-level flag overrides org-level flag', async () => {
+    legacyMethods.getFlags.mockImplementation(async (org: string, repo?: string) => (
+      repo ? { 'ew.enabled': 'false' } : { 'ew.enabled': 'true' }
+    ));
+
+    const result = await client.createSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
+
+    expect(result.editUrl).toBe('https://da.live/edit#/acme/site1/docs/page');
+  });
+
+  it('fetches org-level flags via the legacy client even when the site is HLX6', async () => {
+    isHlx6Mock.mockResolvedValue(true);
+    aemMethods.getFlags.mockResolvedValue({ 'ew.enabled': 'true' });
+
+    await client.createSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
+
+    expect(legacyMethods.getFlags).toHaveBeenCalledWith('acme');
+    expect(aemMethods.getFlags).toHaveBeenCalledWith('acme', 'site1');
+  });
+
+  it('uses canvas# when the HLX6 site-level flag is true', async () => {
+    isHlx6Mock.mockResolvedValue(true);
+    aemMethods.getFlags.mockImplementation(async (org: string, repo?: string) => (
+      repo ? { 'ew.enabled': 'true' } : {}
+    ));
+
+    const result = await client.createSource('acme', 'site1', 'docs/page.html', '<p>hi</p>');
+
+    expect(result.editUrl).toBe('https://da.live/canvas#/acme/site1/docs/page');
   });
 });

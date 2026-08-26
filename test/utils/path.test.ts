@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  normalizePath, normalizePagePath, buildEditUrl, buildAemUrls,
+  normalizePath, normalizePagePath, buildEditUrl, buildAemUrls, buildDaUrl,
 } from '../../src/utils/path';
 
 describe('normalizePath', () => {
@@ -175,6 +175,20 @@ describe('normalizePagePath', () => {
 
     it('should handle a root-level file', () => {
       expect(buildEditUrl('acme', 'site1', 'index.html')).toBe('https://da.live/edit#/acme/site1/index');
+    });
+  });
+
+  describe('buildDaUrl', () => {
+    it('should build an edit URL', () => {
+      expect(buildDaUrl('acme', 'site1', 'docs/page.html', 'edit')).toBe('https://da.live/edit#/acme/site1/docs/page');
+    });
+
+    it('should build a sheet URL', () => {
+      expect(buildDaUrl('acme', 'site1', 'data/config.json', 'sheet')).toBe('https://da.live/sheet#/acme/site1/data/config');
+    });
+
+    it('should build a canvas URL', () => {
+      expect(buildDaUrl('acme', 'site1', 'docs/page.html', 'canvas')).toBe('https://da.live/canvas#/acme/site1/docs/page');
     });
   });
 

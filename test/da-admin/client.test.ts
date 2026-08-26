@@ -95,3 +95,78 @@ describe('DAAdminClient.createVersion', () => {
     expect(await request.text()).toBe(JSON.stringify({ label: 'Version 1700000000000' }));
   });
 });
+
+describe('DAAdminClient.getFlags', () => {
+  it('extracts flags rows from a single-sheet config doc', async () => {
+    const daadminService = createFakeDaadminService(new Response(JSON.stringify({
+      ':type': 'sheet',
+      ':sheetname': 'flags',
+      data: [{ key: 'ew.enabled', value: 'true' }],
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    const client = new DAAdminClient({ apiToken: 'token', daadminService });
+
+    const flags = await client.getFlags('acme', 'site1');
+
+    expect(daadminService.fetch.mock.calls[0][0].url).toBe('https://admin.da.live/config/acme/site1/');
+    expect(flags).toEqual({ 'ew.enabled': 'true' });
+  });
+
+  it('extracts flags rows from a multi-sheet config doc', async () => {
+    const daadminService = createFakeDaadminService(new Response(JSON.stringify({
+      ':type': 'multi-sheet',
+      ':names': ['flags', 'prompts'],
+      flags: { data: [{ key: 'ew.enabled', value: 'false' }] },
+      prompts: { data: [] },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    const client = new DAAdminClient({ apiToken: 'token', daadminService });
+
+    const flags = await client.getFlags('acme', 'site1');
+
+    expect(flags).toEqual({ 'ew.enabled': 'false' });
+  });
+
+  it('fetches the org-level config when repo is omitted', async () => {
+    const daadminService = createFakeDaadminService(new Response('', { status: 404, headers: {} }));
+    const client = new DAAdminClient({ apiToken: 'token', daadminService });
+
+    await client.getFlags('acme');
+
+    expect(daadminService.fetch.mock.calls[0][0].url).toBe('https://admin.da.live/config/acme/');
+  });
+
+  it('returns an empty map when there is no flags sheet', async () => {
+    const daadminService = createFakeDaadminService(new Response(JSON.stringify({
+      ':type': 'sheet',
+      ':sheetname': 'other',
+      data: [{ key: 'x', value: 'y' }],
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    const client = new DAAdminClient({ apiToken: 'token', daadminService });
+
+    const flags = await client.getFlags('acme', 'site1');
+
+    expect(flags).toEqual({});
+  });
+
+  it('returns an empty map when the config does not exist (404)', async () => {
+    const daadminService = createFakeDaadminService(new Response('', { status: 404, headers: {} }));
+    const client = new DAAdminClient({ apiToken: 'token', daadminService });
+
+    const flags = await client.getFlags('acme', 'site1');
+
+    expect(flags).toEqual({});
+  });
+
+  it('does not log a noisy error block for the expected 404 (config-probe log noise)', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const daadminService = createFakeDaadminService(new Response('', { status: 404, headers: {} }));
+    const client = new DAAdminClient({ apiToken: 'token', daadminService });
+
+    await client.getFlags('acme', 'site1');
+
+    const errorLines = logSpy.mock.calls.filter((call) => (
+      call[0] === 'DA Admin API Error:' || call[0] === 'DA Admin API Request Failed:'
+    ));
+    expect(errorLines).toHaveLength(0);
+    logSpy.mockRestore();
+  });
+});

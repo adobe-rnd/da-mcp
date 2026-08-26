@@ -15,9 +15,23 @@ import {
   IAdminClient,
 } from './types';
 import { buildEditUrl } from '../utils/path';
+import { FlagRow, rowsToMap } from '../utils/flags';
 
 interface DASourceResponse {
   aem?: { previewUrl?: string; liveUrl?: string };
+}
+
+interface DASheetConfig {
+  ':type'?: 'sheet' | 'multi-sheet';
+  ':sheetname'?: string;
+  data?: FlagRow[];
+  flags?: { data?: FlagRow[] };
+}
+
+function extractFlagsRows(raw: DASheetConfig): FlagRow[] {
+  if (raw[':type'] === 'multi-sheet') return raw.flags?.data ?? [];
+  if (raw[':type'] === 'sheet' && raw[':sheetname'] === 'flags') return raw.data ?? [];
+  return [];
 }
 
 export class DAAdminClient implements IAdminClient {
@@ -39,9 +53,9 @@ export class DAAdminClient implements IAdminClient {
    */
   private async request<T>(
     endpoint: string,
-    options: RequestInit & { binary?: boolean } = {},
+    options: RequestInit & { binary?: boolean; quiet404?: boolean } = {},
   ): Promise<T> {
-    const { binary, ...requestOptions } = options;
+    const { binary, quiet404, ...requestOptions } = options;
     const method = requestOptions.method || 'GET';
 
     console.log(`DA Admin API Call: Method: ${method} Endpoint: ${endpoint}`);
@@ -102,14 +116,19 @@ export class DAAdminClient implements IAdminClient {
           backend: 'da-admin',
         };
 
+        const isQuiet404 = quiet404 && response.status === 404;
         try {
           const errorData: any = await response.json();
           error.details = errorData;
           error.message = errorData.message || error.message;
-          console.log('DA Admin API Error:', JSON.stringify(error, null, 2));
+          if (!isQuiet404) {
+            console.log('DA Admin API Error:', JSON.stringify(error, null, 2));
+          }
         } catch {
           // If response is not JSON, use statusText
-          console.log('DA Admin API Error:', error.status, error.message);
+          if (!isQuiet404) {
+            console.log('DA Admin API Error:', error.status, error.message);
+          }
         }
 
         throw error;
@@ -148,7 +167,11 @@ export class DAAdminClient implements IAdminClient {
         throw timeoutError;
       }
 
-      console.log('DA Admin API Request Failed:', error);
+      const isQuiet404 = quiet404 && typeof error === 'object' && error !== null
+        && (error as DAAPIError).status === 404;
+      if (!isQuiet404) {
+        console.log('DA Admin API Request Failed:', error);
+      }
       throw error;
     }
   }
@@ -301,6 +324,26 @@ export class DAAdminClient implements IAdminClient {
   ): Promise<DAVersionsResponse> {
     const endpoint = `/versionlist/${org}/${repo}/${path}`;
     return this.request<DAVersionsResponse>(endpoint);
+  }
+
+  /**
+   * Fetches the org/site config's 'flags' sheet as a plain key/value map
+   * (e.g. used to check the 'ew.enabled' Experience Workspace flag). Not
+   * part of IAdminClient — an internal capability, not an MCP tool.
+   * Pass only `org` for the org-level config, or `org` + `repo` for the
+   * site-level config. Returns {} if the config or the flags sheet
+   * doesn't exist (a common, expected case, not an error).
+   */
+  async getFlags(org: string, repo?: string): Promise<Record<string, string>> {
+    const endpoint = repo ? `/config/${org}/${repo}/` : `/config/${org}/`;
+    try {
+      // quiet404: most orgs won't have a flags config sheet at all, so a 404 here is
+      // expected/common, not worth logging a full error block for on every create/update.
+      const raw = await this.request<DASheetConfig>(endpoint, { quiet404: true });
+      return rowsToMap(extractFlagsRows(raw));
+    } catch {
+      return {};
+    }
   }
 
   /**

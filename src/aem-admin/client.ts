@@ -22,6 +22,11 @@ import {
 } from './types';
 import { mapCopyResponse, mapFolderListing, mapVersionListing } from './mappers';
 import { buildEditUrl, buildAemUrls } from '../utils/path';
+import { rowsToMap } from '../utils/flags';
+
+interface AemFlagsConfig {
+  flags?: { key: string; value: string }[];
+}
 
 const DEFAULT_BASE_URL = 'https://api.aem.live';
 
@@ -40,9 +45,9 @@ export class AemAdminClient implements IAdminClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit & { binary?: boolean } = {},
+    options: RequestInit & { binary?: boolean; quiet404?: boolean } = {},
   ): Promise<T> {
-    const { binary, ...requestOptions } = options;
+    const { binary, quiet404, ...requestOptions } = options;
     const headers = new Headers(requestOptions.headers || {});
     headers.set('Authorization', `Bearer ${this.apiToken}`);
     const method = requestOptions.method || 'GET';
@@ -88,7 +93,9 @@ export class AemAdminClient implements IAdminClient {
         } catch {
           // response body was not JSON, keep statusText
         }
-        console.log('AEM Admin API Error:', JSON.stringify(error, null, 2));
+        if (!(quiet404 && response.status === 404)) {
+          console.log('AEM Admin API Error:', JSON.stringify(error, null, 2));
+        }
         throw error;
       }
 
@@ -122,7 +129,11 @@ export class AemAdminClient implements IAdminClient {
         timeoutError.backend = 'aem-admin';
         throw timeoutError;
       }
-      console.log('AEM Admin API Request Failed:', error);
+      const isQuiet404 = quiet404 && typeof error === 'object' && error !== null
+        && (error as DAAPIError).status === 404;
+      if (!isQuiet404) {
+        console.log('AEM Admin API Request Failed:', error);
+      }
       throw error;
     }
   }
@@ -213,6 +224,28 @@ export class AemAdminClient implements IAdminClient {
     const endpoint = `/${org}/sites/${repo}/source/${path}/.versions`;
     const raw = await this.request<AemVersionListingEntry[]>(endpoint);
     return mapVersionListing(raw);
+  }
+
+  /**
+   * Fetches the site config's 'flags' field as a plain key/value map (e.g.
+   * used to check the 'ew.enabled' Experience Workspace flag). Not part
+   * of IAdminClient — an internal capability, not an MCP tool. Unlike
+   * DAAdminClient there is no org-only variant here — org-level Experience
+   * Workspace checks always go through the legacy backend (see
+   * AdminClient), matching da-nx's own convention since there's no site
+   * to route by. Returns {} if the config or the flags field doesn't
+   * exist (a common, expected case, not an error).
+   */
+  async getFlags(org: string, repo: string): Promise<Record<string, string>> {
+    const endpoint = `/${org}/sites/${repo}/config/editor/da.json`;
+    try {
+      // quiet404: most orgs won't have a flags config sheet at all, so a 404 here is
+      // expected/common, not worth logging a full error block for on every create/update.
+      const raw = await this.request<AemFlagsConfig>(endpoint, { quiet404: true });
+      return rowsToMap(raw.flags ?? []);
+    } catch {
+      return {};
+    }
   }
 
   async createVersion(

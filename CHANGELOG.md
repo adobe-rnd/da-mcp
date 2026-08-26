@@ -1,3 +1,27 @@
+# [1.6.0](https://github.com/adobe-rnd/da-mcp/compare/v1.5.0...v1.6.0) (2026-08-26)
+
+
+### Bug Fixes
+
+* default createVersion label for the legacy backend only ([f5635f9](https://github.com/adobe-rnd/da-mcp/commit/f5635f98dff14f5ae86793c4ff545dd72118706a)), closes [pass-throu#label](https://github.com/pass-throu/issues/label)
+* don't fail writes on editUrl-resolution errors; quiet expected 404 noise from flag probes ([1b3bbab](https://github.com/adobe-rnd/da-mcp/commit/1b3bbab611d197c0ba117bad9d0e943dcb457098)), closes [#37](https://github.com/adobe-rnd/da-mcp/issues/37)
+* probe isHlx6 once per write, not twice ([b5c4f35](https://github.com/adobe-rnd/da-mcp/commit/b5c4f357b698be4c712f21f763cc04ee39ecc189))
+* restore previewUrl/liveUrl in createSource/updateSource per PR [#33](https://github.com/adobe-rnd/da-mcp/issues/33) review ([cb7efca](https://github.com/adobe-rnd/da-mcp/commit/cb7efca3c163d8dda1d8a6b35c99003df04601bf))
+* URL-encode versionId in AemAdminClient.getVersion ([27cfc8c](https://github.com/adobe-rnd/da-mcp/commit/27cfc8c25a6b10bdc62093234b97b8b04ada7ca0)), closes [#32](https://github.com/adobe-rnd/da-mcp/issues/32)
+
+
+### Features
+
+* add da_create_version and da_get_version tools ([19b413a](https://github.com/adobe-rnd/da-mcp/commit/19b413a450641bfcd3d369849e7793c13d135bbd))
+* add da_create_version and da_get_version tools ([c459492](https://github.com/adobe-rnd/da-mcp/commit/c45949265ce770a4069283e5e9b54b2a9112963b))
+* add MCP tool annotations (readOnlyHint / idempotentHint) ([18c7991](https://github.com/adobe-rnd/da-mcp/commit/18c79916d5695a480fa44722210f1cdf7c60dbb6))
+* add MCP tool annotations (readOnlyHint / idempotentHint) ([24ed954](https://github.com/adobe-rnd/da-mcp/commit/24ed95462df6f1f60b959f396f3a11e53f565c7f)), closes [#32](https://github.com/adobe-rnd/da-mcp/issues/32)
+* add MCP tool annotations for da_get_versions/da_create_version/da_get_version ([ee7812b](https://github.com/adobe-rnd/da-mcp/commit/ee7812b53a1d703f18c9d1f5c43f87e77723c299)), closes [#36](https://github.com/adobe-rnd/da-mcp/issues/36)
+* construct DA editUrl on createSource/updateSource for both backends ([702256e](https://github.com/adobe-rnd/da-mcp/commit/702256ef8f5a7b6be39f7f7bf453d7fedcbb864e))
+* construct DA editUrl on createSource/updateSource for both backends ([34061b6](https://github.com/adobe-rnd/da-mcp/commit/34061b6cdc98f17947ad3498653fba5d91e1b3f3))
+* use sheet#/canvas# editUrl variants for .json files and Experience Workspace sites ([2a886e8](https://github.com/adobe-rnd/da-mcp/commit/2a886e8ca110744bc808dc4f2c8141c8792e9ab4))
+* use sheet#/canvas# editUrl variants for .json files and Experience Workspace sites ([24b2f97](https://github.com/adobe-rnd/da-mcp/commit/24b2f97681e0f471c0cd61f48fdd6c899fa5553b))
+
 # [1.5.0](https://github.com/adobe-rnd/da-mcp/compare/v1.4.0...v1.5.0) (2026-08-25)
 
 

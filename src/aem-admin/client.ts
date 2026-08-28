@@ -50,6 +50,7 @@ export class AemAdminClient implements IAdminClient {
     const { binary, quiet404, ...requestOptions } = options;
     const headers = new Headers(requestOptions.headers || {});
     headers.set('Authorization', `Bearer ${this.apiToken}`);
+    headers.set('x-content-source-authorization', `Bearer ${this.apiToken}`);
     const method = requestOptions.method || 'GET';
 
     console.log(`AEM Admin API Call: Method: ${method} Endpoint: ${endpoint}`);

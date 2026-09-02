@@ -14,9 +14,11 @@ import {
   DAOperationResponse,
   IAdminClient,
 } from './types';
-import { buildEditUrl, buildAemUrls } from '../utils/path';
+import { buildEditUrl } from '../utils/path';
 import { FlagRow, rowsToMap } from '../utils/flags';
 import { DEFAULT_HLX_ADMIN_BASE_URL } from '../admin/detect';
+import { AemPreviewLiveResponse } from '../aem-admin/types';
+import { mapPreviewLiveResponse } from '../aem-admin/mappers';
 
 interface DASourceResponse {
   aem?: { previewUrl?: string; liveUrl?: string };
@@ -534,11 +536,11 @@ export class DAAdminClient implements IAdminClient {
    */
   async previewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
     const endpoint = `/preview/${org}/${repo}/main/${path}`;
-    await this.requestHlx<unknown>(endpoint, {
+    const raw = await this.requestHlx<AemPreviewLiveResponse>(endpoint, {
       method: 'POST',
       headers: { 'x-content-source-authorization': `Bearer ${this.apiToken}` },
     });
-    return { success: true, path, ...buildAemUrls(org, repo, path) };
+    return mapPreviewLiveResponse(raw, org, repo, path);
   }
 
   /**
@@ -555,8 +557,8 @@ export class DAAdminClient implements IAdminClient {
    */
   async publishContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
     const endpoint = `/live/${org}/${repo}/main/${path}`;
-    await this.requestHlx<unknown>(endpoint, { method: 'POST' });
-    return { success: true, path, ...buildAemUrls(org, repo, path) };
+    const raw = await this.requestHlx<AemPreviewLiveResponse>(endpoint, { method: 'POST' });
+    return mapPreviewLiveResponse(raw, org, repo, path);
   }
 
   /**

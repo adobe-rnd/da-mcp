@@ -310,8 +310,10 @@ describe('AemAdminClient', () => {
     });
   });
 
-  it('previewContent POSTs to the preview endpoint with no ref segment and no content-source header', async () => {
-    fetchMock.mockResolvedValue(new Response('', { status: 200, headers: {} }));
+  it('previewContent POSTs to the preview endpoint with no ref segment and no content-source header, using the response body\'s own previewUrl and falling back to the computed liveUrl (absent from a preview response)', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({
+      preview: { status: 200, url: 'https://custom-branch--site1--acme.aem.page/docs/page' },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
 
     const result = await client.previewContent('acme', 'site1', 'docs/page.html');
 
@@ -322,7 +324,7 @@ describe('AemAdminClient', () => {
     expect(result).toEqual({
       success: true,
       path: 'docs/page.html',
-      previewUrl: 'https://main--site1--acme.aem.page/docs/page',
+      previewUrl: 'https://custom-branch--site1--acme.aem.page/docs/page',
       liveUrl: 'https://main--site1--acme.aem.live/docs/page',
     });
   });
@@ -338,8 +340,10 @@ describe('AemAdminClient', () => {
     expect(result).toEqual({ success: true, path: 'docs/page.html' });
   });
 
-  it('publishContent POSTs to the live endpoint with no ref segment', async () => {
-    fetchMock.mockResolvedValue(new Response('', { status: 200, headers: {} }));
+  it('publishContent POSTs to the live endpoint with no ref segment, using the response body\'s own liveUrl and falling back to the computed previewUrl (absent from a live response)', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({
+      live: { status: 200, url: 'https://custom-branch--site1--acme.aem.live/docs/page' },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
 
     const result = await client.publishContent('acme', 'site1', 'docs/page.html');
 
@@ -350,7 +354,7 @@ describe('AemAdminClient', () => {
       success: true,
       path: 'docs/page.html',
       previewUrl: 'https://main--site1--acme.aem.page/docs/page',
-      liveUrl: 'https://main--site1--acme.aem.live/docs/page',
+      liveUrl: 'https://custom-branch--site1--acme.aem.live/docs/page',
     });
   });
 

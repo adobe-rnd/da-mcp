@@ -192,8 +192,10 @@ describe('DAAdminClient preview/publish', () => {
     vi.unstubAllGlobals();
   });
 
-  it('previewContent POSTs to admin.hlx.page /preview/{org}/{repo}/main/{path} with x-content-source-authorization set to the same bearer value as Authorization', async () => {
-    fetchMock.mockResolvedValue(new Response('', { status: 200, headers: {} }));
+  it('previewContent POSTs to admin.hlx.page /preview/{org}/{repo}/main/{path} with x-content-source-authorization set to the same bearer value as Authorization, using the response body\'s own previewUrl and falling back to the computed liveUrl', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({
+      preview: { status: 200, url: 'https://custom-branch--site1--acme.aem.page/docs/page' },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
 
     const result = await client.previewContent('acme', 'site1', 'docs/page.html');
 
@@ -206,7 +208,7 @@ describe('DAAdminClient preview/publish', () => {
     expect(result).toEqual({
       success: true,
       path: 'docs/page.html',
-      previewUrl: 'https://main--site1--acme.aem.page/docs/page',
+      previewUrl: 'https://custom-branch--site1--acme.aem.page/docs/page',
       liveUrl: 'https://main--site1--acme.aem.live/docs/page',
     });
   });
@@ -223,8 +225,10 @@ describe('DAAdminClient preview/publish', () => {
     expect(result).toEqual({ success: true, path: 'docs/page.html' });
   });
 
-  it('publishContent POSTs to admin.hlx.page /live/{org}/{repo}/main/{path} without x-content-source-authorization', async () => {
-    fetchMock.mockResolvedValue(new Response('', { status: 200, headers: {} }));
+  it('publishContent POSTs to admin.hlx.page /live/{org}/{repo}/main/{path} without x-content-source-authorization, using the response body\'s own liveUrl and falling back to the computed previewUrl', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({
+      live: { status: 200, url: 'https://custom-branch--site1--acme.aem.live/docs/page' },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
 
     const result = await client.publishContent('acme', 'site1', 'docs/page.html');
 
@@ -236,7 +240,7 @@ describe('DAAdminClient preview/publish', () => {
       success: true,
       path: 'docs/page.html',
       previewUrl: 'https://main--site1--acme.aem.page/docs/page',
-      liveUrl: 'https://main--site1--acme.aem.live/docs/page',
+      liveUrl: 'https://custom-branch--site1--acme.aem.live/docs/page',
     });
   });
 

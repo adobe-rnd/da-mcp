@@ -63,22 +63,7 @@ export interface DAOperationResponse {
   success: boolean;
   message?: string;
   path?: string;
-  /**
-   * DA editor URL for this document (https://da.live/edit#/{org}/{repo}/{path}),
-   * constructed by createSource/updateSource on both backends — see
-   * utils/path.ts buildEditUrl(). Not populated by other operations.
-   */
   editUrl?: string;
-  /**
-   * AEM Edge Delivery preview/live URLs for this document. On the legacy
-   * backend these are parsed from the real admin.da.live response
-   * (aem.previewUrl / aem.liveUrl); on HLX6 (whose create/update responses
-   * don't include them) they're computed with the same URL pattern — see
-   * utils/path.ts buildAemUrls(). Also populated by previewContent (both
-   * backends) and publishContent (both backends), computed via
-   * buildAemUrls() rather than parsed from the response body. Not
-   * populated by unpreviewContent, unpublishContent, or other operations.
-   */
   previewUrl?: string;
   liveUrl?: string;
 }
@@ -93,12 +78,6 @@ export interface DAAPIError {
   status: number;
   message: string;
   details?: any;
-  /**
-   * Which admin backend produced this error. Set by DAAdminClient
-   * ('da-admin') and AemAdminClient ('aem-admin') so formatError() in
-   * src/mcp/handlers.ts can label the error correctly regardless of
-   * which backend an org/repo was routed to.
-   */
   backend?: 'da-admin' | 'aem-admin';
 }
 
@@ -139,13 +118,6 @@ export interface IAdminClient {
     path: string,
     label?: string,
   ): Promise<DAOperationResponse>;
-  /**
-   * Retrieve the content of a specific version. `versionId` must be the
-   * identifier returned in the `url` field of a prior getVersions() call —
-   * its shape differs by backend (legacy: an opaque `/versionsource/...`
-   * path; HLX6: a short version id) and is not something a caller should
-   * construct manually.
-   */
   getVersion(org: string, repo: string, path: string, versionId: string): Promise<DASourceContent>;
   lookupMedia(org: string, repo: string, mediaPath: string): Promise<DAMediaContent>;
   lookupFragment(org: string, repo: string, fragmentPath: string): Promise<DAMediaReference>;
@@ -157,12 +129,8 @@ export interface IAdminClient {
     mimeType: string,
     fileName: string,
   ): Promise<DAOperationResponse>;
-  /** Preview (create/update) a document. Populates previewUrl/liveUrl on success. */
   previewContent(org: string, repo: string, path: string): Promise<DAOperationResponse>;
-  /** Remove a document's preview. Does not populate previewUrl/liveUrl. */
   unpreviewContent(org: string, repo: string, path: string): Promise<DAOperationResponse>;
-  /** Publish a document to live. Populates previewUrl/liveUrl on success. */
   publishContent(org: string, repo: string, path: string): Promise<DAOperationResponse>;
-  /** Remove a document from live (unpublish). Does not populate previewUrl/liveUrl. */
   unpublishContent(org: string, repo: string, path: string): Promise<DAOperationResponse>;
 }

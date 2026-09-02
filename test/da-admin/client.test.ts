@@ -251,18 +251,4 @@ describe('DAAdminClient preview/publish', () => {
     expect(new Headers(init.headers).get('x-content-source-authorization')).toBeNull();
     expect(result).toEqual({ success: true, path: 'docs/page.html' });
   });
-
-  it('uses a custom hlxAdminBaseUrl when provided', async () => {
-    const customClient = new DAAdminClient({
-      apiToken: 'my-token',
-      daadminService: createFakeDaadminService(new Response('', { status: 200, headers: {} })),
-      hlxAdminBaseUrl: 'https://stage-admin.hlx.page',
-    });
-    fetchMock.mockResolvedValue(new Response('', { status: 200, headers: {} }));
-
-    await customClient.previewContent('acme', 'site1', 'docs/page.html');
-
-    const [url] = fetchMock.mock.calls[0];
-    expect(url).toBe('https://stage-admin.hlx.page/preview/acme/site1/main/docs/page.html');
-  });
 });

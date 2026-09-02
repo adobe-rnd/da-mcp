@@ -87,13 +87,6 @@ export interface DAAdminClientOptions {
   apiToken: string;
   daadminService: Fetcher;
   timeout?: number;
-  /**
-   * Base URL for the Helix admin API (admin.hlx.page), used only by
-   * previewContent/unpreviewContent/publishContent/unpublishContent —
-   * admin.da.live has no preview/live routes of its own. Defaults to
-   * DEFAULT_HLX_ADMIN_BASE_URL (see admin/detect.ts) when omitted.
-   */
-  hlxAdminBaseUrl?: string;
 }
 
 export interface DAAPIError {

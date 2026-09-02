@@ -42,13 +42,10 @@ export class DAAdminClient implements IAdminClient {
 
   private timeout: number;
 
-  private hlxAdminBaseUrl: string;
-
   constructor(options: DAAdminClientOptions) {
     this.apiToken = options.apiToken;
     this.daadminService = options.daadminService;
     this.timeout = options.timeout || 30000; // 30 seconds default
-    this.hlxAdminBaseUrl = options.hlxAdminBaseUrl || DEFAULT_HLX_ADMIN_BASE_URL;
   }
 
   /**
@@ -478,7 +475,7 @@ export class DAAdminClient implements IAdminClient {
     const startTime = Date.now();
 
     try {
-      const response = await fetch(`${this.hlxAdminBaseUrl}${endpoint}`, {
+      const response = await fetch(`${DEFAULT_HLX_ADMIN_BASE_URL}${endpoint}`, {
         ...options,
         headers,
         signal: controller.signal,

@@ -51,8 +51,9 @@ src/
 - **Copy/move API:** Endpoint is `/copy|move/{org}/{repo}/{sourcePath}`; body is FormData with `destination` = `/{org}/{repo}/{destinationPath}`
 - **Empty responses:** `client.ts` reads body as text first; returns `{}` for empty/no-content responses (204 etc.)
 - **30-second timeout:** All API requests have AbortController timeout
-- **Path normalization:** All handlers normalize paths via `src/utils/path.ts` before passing to client; `.html` extension auto-added where needed
+- **Path normalization:** All handlers normalize paths via `src/utils/path.ts` before passing to client; `.html` extension auto-added where needed for source file operations, but **stripped** for preview/publish (see below) since those are page/URL paths, not source file paths
 - **Preview/live on legacy DA:** `admin.da.live` has no preview/live routes of its own — `DAAdminClient.previewContent/unpreviewContent/publishContent/unpublishContent` call the Helix admin API (`admin.hlx.page`) directly via global `fetch()` instead of the `daadminService` binding, always targeting the `main` ref. Preview `POST` calls additionally send `x-content-source-authorization` alongside `Authorization`.
+- **Preview/live paths have no file extension:** on both legacy and HLX6, `da_preview_content`/`da_unpreview_content`/`da_publish_content`/`da_unpublish_content` strip any extension from the given path via `stripFileExtension()` (`src/utils/path.ts`) before calling the client — AEM Edge Delivery preview/live URLs are always extensionless page routes.
 
 ## Tools
 

@@ -204,7 +204,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
       repo: z.string().describe('Site / Repository name'),
-      path: z.string().describe('Path to the file to preview'),
+      path: z.string().describe('Path to the page to preview. Any file extension (e.g. ".html") is stripped automatically, since preview URLs never include one.'),
     }),
     annotations: { readOnlyHint: false, idempotentHint: true },
   }, (args) => handlePreviewContent(client, args) as Promise<CallToolResult>);
@@ -214,7 +214,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
       repo: z.string().describe('Site / Repository name'),
-      path: z.string().describe('Path to the file to unpreview'),
+      path: z.string().describe('Path to the page to unpreview. Any file extension (e.g. ".html") is stripped automatically, since preview URLs never include one.'),
     }),
     annotations: { readOnlyHint: false, idempotentHint: true, destructiveHint: true },
   }, (args) => handleUnpreviewContent(client, args) as Promise<CallToolResult>);
@@ -225,7 +225,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
       repo: z.string().describe('Site / Repository name'),
-      path: z.string().describe('Path to the file to publish'),
+      path: z.string().describe('Path to the page to publish. Any file extension (e.g. ".html") is stripped automatically, since live URLs never include one.'),
     }),
     annotations: { readOnlyHint: false, idempotentHint: true },
   }, (args) => handlePublishContent(client, args) as Promise<CallToolResult>);
@@ -235,7 +235,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
       repo: z.string().describe('Site / Repository name'),
-      path: z.string().describe('Path to the file to unpublish'),
+      path: z.string().describe('Path to the page to unpublish. Any file extension (e.g. ".html") is stripped automatically, since live URLs never include one.'),
     }),
     annotations: { readOnlyHint: false, idempotentHint: true, destructiveHint: true },
   }, (args) => handleUnpublishContent(client, args) as Promise<CallToolResult>);

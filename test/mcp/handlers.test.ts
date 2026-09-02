@@ -197,48 +197,48 @@ describe('Handler path normalization', () => {
   describe('handlePreviewContent', () => {
     it('should normalize path with leading slash', async () => {
       await handlePreviewContent(mockClient, { org: 'test', repo: 'repo', path: '/docs/page' });
-      expect(mockClient.previewContent).toHaveBeenCalledWith('test', 'repo', 'docs/page.html');
+      expect(mockClient.previewContent).toHaveBeenCalledWith('test', 'repo', 'docs/page');
     });
 
-    it('should add .html extension when not provided', async () => {
-      await handlePreviewContent(mockClient, { org: 'test', repo: 'repo', path: 'docs/page' });
-      expect(mockClient.previewContent).toHaveBeenCalledWith('test', 'repo', 'docs/page.html');
+    it('should strip a .html extension, since preview URLs never include one', async () => {
+      await handlePreviewContent(mockClient, { org: 'test', repo: 'repo', path: 'docs/page.html' });
+      expect(mockClient.previewContent).toHaveBeenCalledWith('test', 'repo', 'docs/page');
     });
   });
 
   describe('handleUnpreviewContent', () => {
     it('should normalize path with leading slash', async () => {
       await handleUnpreviewContent(mockClient, { org: 'test', repo: 'repo', path: '/docs/page' });
-      expect(mockClient.unpreviewContent).toHaveBeenCalledWith('test', 'repo', 'docs/page.html');
+      expect(mockClient.unpreviewContent).toHaveBeenCalledWith('test', 'repo', 'docs/page');
     });
 
-    it('should add .html extension when not provided', async () => {
-      await handleUnpreviewContent(mockClient, { org: 'test', repo: 'repo', path: 'docs/page' });
-      expect(mockClient.unpreviewContent).toHaveBeenCalledWith('test', 'repo', 'docs/page.html');
+    it('should strip a .html extension, since preview URLs never include one', async () => {
+      await handleUnpreviewContent(mockClient, { org: 'test', repo: 'repo', path: 'docs/page.html' });
+      expect(mockClient.unpreviewContent).toHaveBeenCalledWith('test', 'repo', 'docs/page');
     });
   });
 
   describe('handlePublishContent', () => {
     it('should normalize path with leading slash', async () => {
       await handlePublishContent(mockClient, { org: 'test', repo: 'repo', path: '/docs/page' });
-      expect(mockClient.publishContent).toHaveBeenCalledWith('test', 'repo', 'docs/page.html');
+      expect(mockClient.publishContent).toHaveBeenCalledWith('test', 'repo', 'docs/page');
     });
 
-    it('should add .html extension when not provided', async () => {
-      await handlePublishContent(mockClient, { org: 'test', repo: 'repo', path: 'docs/page' });
-      expect(mockClient.publishContent).toHaveBeenCalledWith('test', 'repo', 'docs/page.html');
+    it('should strip a .html extension, since live URLs never include one', async () => {
+      await handlePublishContent(mockClient, { org: 'test', repo: 'repo', path: 'docs/page.html' });
+      expect(mockClient.publishContent).toHaveBeenCalledWith('test', 'repo', 'docs/page');
     });
   });
 
   describe('handleUnpublishContent', () => {
     it('should normalize path with leading slash', async () => {
       await handleUnpublishContent(mockClient, { org: 'test', repo: 'repo', path: '/docs/page' });
-      expect(mockClient.unpublishContent).toHaveBeenCalledWith('test', 'repo', 'docs/page.html');
+      expect(mockClient.unpublishContent).toHaveBeenCalledWith('test', 'repo', 'docs/page');
     });
 
-    it('should add .html extension when not provided', async () => {
-      await handleUnpublishContent(mockClient, { org: 'test', repo: 'repo', path: 'docs/page' });
-      expect(mockClient.unpublishContent).toHaveBeenCalledWith('test', 'repo', 'docs/page.html');
+    it('should strip a .html extension, since live URLs never include one', async () => {
+      await handleUnpublishContent(mockClient, { org: 'test', repo: 'repo', path: 'docs/page.html' });
+      expect(mockClient.unpublishContent).toHaveBeenCalledWith('test', 'repo', 'docs/page');
     });
   });
 

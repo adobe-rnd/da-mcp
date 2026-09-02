@@ -4,7 +4,7 @@
  */
 
 import { DAAPIError, IAdminClient } from '../da-admin/types';
-import { normalizePath, normalizePagePath } from '../utils/path';
+import { normalizePath, normalizePagePath, stripFileExtension } from '../utils/path';
 
 /**
  * Format error for MCP client
@@ -504,7 +504,7 @@ export async function handlePreviewContent(
   args: { org: string; repo: string; path: string },
 ) {
   try {
-    const normalizedPath = normalizePagePath(args.path)!;
+    const normalizedPath = stripFileExtension(normalizePath(args.path)!);
     const response = await client.previewContent(args.org, args.repo, normalizedPath);
     return {
       content: [
@@ -535,7 +535,7 @@ export async function handleUnpreviewContent(
   args: { org: string; repo: string; path: string },
 ) {
   try {
-    const normalizedPath = normalizePagePath(args.path)!;
+    const normalizedPath = stripFileExtension(normalizePath(args.path)!);
     const response = await client.unpreviewContent(args.org, args.repo, normalizedPath);
     return {
       content: [
@@ -566,7 +566,7 @@ export async function handlePublishContent(
   args: { org: string; repo: string; path: string },
 ) {
   try {
-    const normalizedPath = normalizePagePath(args.path)!;
+    const normalizedPath = stripFileExtension(normalizePath(args.path)!);
     const response = await client.publishContent(args.org, args.repo, normalizedPath);
     return {
       content: [
@@ -597,7 +597,7 @@ export async function handleUnpublishContent(
   args: { org: string; repo: string; path: string },
 ) {
   try {
-    const normalizedPath = normalizePagePath(args.path)!;
+    const normalizedPath = stripFileExtension(normalizePath(args.path)!);
     const response = await client.unpublishContent(args.org, args.repo, normalizedPath);
     return {
       content: [

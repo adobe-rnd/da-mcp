@@ -46,10 +46,14 @@ export function normalizePagePath(path: string | undefined): string | undefined 
 /**
  * Strips the extension from the filename portion of a path, preserving
  * any directory prefix (e.g. 'docs/page.html' -> 'docs/page'). Shared by
- * buildEditUrl and buildAemUrls, which both drop the extension from the
- * source path per DA/AEM's URL conventions.
+ * buildEditUrl and buildAemUrls (which both drop the extension from the
+ * source path per DA/AEM's URL conventions) and by the preview/publish
+ * handlers in mcp/handlers.ts, which normalize their path argument to
+ * this same extensionless form before calling the admin client — preview
+ * and live are AEM Edge Delivery *page* routes, not DA *source file*
+ * routes, and never take a .html/.md/etc suffix.
  */
-function stripFileExtension(path: string): string {
+export function stripFileExtension(path: string): string {
   const lastSlash = path.lastIndexOf('/');
   const dir = lastSlash >= 0 ? path.slice(0, lastSlash + 1) : '';
   const filename = lastSlash >= 0 ? path.slice(lastSlash + 1) : path;

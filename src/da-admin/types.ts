@@ -74,7 +74,10 @@ export interface DAOperationResponse {
    * backend these are parsed from the real admin.da.live response
    * (aem.previewUrl / aem.liveUrl); on HLX6 (whose create/update responses
    * don't include them) they're computed with the same URL pattern — see
-   * utils/path.ts buildAemUrls(). Not populated by other operations.
+   * utils/path.ts buildAemUrls(). Also populated by previewContent (both
+   * backends) and publishContent (both backends), computed via
+   * buildAemUrls() rather than parsed from the response body. Not
+   * populated by unpreviewContent, unpublishContent, or other operations.
    */
   previewUrl?: string;
   liveUrl?: string;
@@ -154,4 +157,12 @@ export interface IAdminClient {
     mimeType: string,
     fileName: string,
   ): Promise<DAOperationResponse>;
+  /** Preview (create/update) a document. Populates previewUrl/liveUrl on success. */
+  previewContent(org: string, repo: string, path: string): Promise<DAOperationResponse>;
+  /** Remove a document's preview. Does not populate previewUrl/liveUrl. */
+  unpreviewContent(org: string, repo: string, path: string): Promise<DAOperationResponse>;
+  /** Publish a document to live. Populates previewUrl/liveUrl on success. */
+  publishContent(org: string, repo: string, path: string): Promise<DAOperationResponse>;
+  /** Remove a document from live (unpublish). Does not populate previewUrl/liveUrl. */
+  unpublishContent(org: string, repo: string, path: string): Promise<DAOperationResponse>;
 }

@@ -14,7 +14,7 @@ import {
   DAOperationResponse,
   IAdminClient,
 } from './types';
-import { buildEditUrl } from '../utils/path';
+import { buildEditUrl, buildAemUrls } from '../utils/path';
 import { FlagRow, rowsToMap } from '../utils/flags';
 
 interface DASourceResponse {
@@ -448,5 +448,52 @@ export class DAAdminClient implements IAdminClient {
       method: 'POST',
       body: formData,
     });
+  }
+
+  /**
+   * Preview (create/update) a document. Always targets the `main` ref —
+   * admin.da.live org/repos map 1:1 to a single hlx site/branch, so unlike
+   * the classic admin.hlx.page API's {org}/{repo}/{ref}/{path} shape,
+   * there's no separate ref to thread through here.
+   *
+   * Sends x-content-source-authorization alongside Authorization: this
+   * preview call fetches/renders content from the source, which the
+   * legacy backend requires a content-source credential for. The other
+   * three operations here don't fetch content, so they don't need it.
+   */
+  async previewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const endpoint = `/preview/${org}/${repo}/main/${path}`;
+    await this.request<unknown>(endpoint, {
+      method: 'POST',
+      headers: { 'x-content-source-authorization': `Bearer ${this.apiToken}` },
+    });
+    return { success: true, path, ...buildAemUrls(org, repo, path) };
+  }
+
+  /**
+   * Remove a document's preview.
+   */
+  async unpreviewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const endpoint = `/preview/${org}/${repo}/main/${path}`;
+    await this.request<unknown>(endpoint, { method: 'DELETE' });
+    return { success: true, path };
+  }
+
+  /**
+   * Publish a document to live.
+   */
+  async publishContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const endpoint = `/live/${org}/${repo}/main/${path}`;
+    await this.request<unknown>(endpoint, { method: 'POST' });
+    return { success: true, path, ...buildAemUrls(org, repo, path) };
+  }
+
+  /**
+   * Remove a document from live (unpublish).
+   */
+  async unpublishContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const endpoint = `/live/${org}/${repo}/main/${path}`;
+    await this.request<unknown>(endpoint, { method: 'DELETE' });
+    return { success: true, path };
   }
 }

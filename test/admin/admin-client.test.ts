@@ -21,6 +21,10 @@ const legacyMethods = {
   lookupMedia: vi.fn().mockResolvedValue({ data: '', mimeType: 'image/png' }),
   lookupFragment: vi.fn().mockResolvedValue({ path: 'legacy', url: '' }),
   uploadMedia: vi.fn().mockResolvedValue({ success: true, path: 'legacy' }),
+  previewContent: vi.fn().mockResolvedValue({ success: true, path: 'legacy' }),
+  unpreviewContent: vi.fn().mockResolvedValue({ success: true, path: 'legacy' }),
+  publishContent: vi.fn().mockResolvedValue({ success: true, path: 'legacy' }),
+  unpublishContent: vi.fn().mockResolvedValue({ success: true, path: 'legacy' }),
   getFlags: vi.fn().mockResolvedValue({}),
 };
 
@@ -40,6 +44,10 @@ const aemMethods = {
   lookupMedia: vi.fn().mockResolvedValue({ data: '', mimeType: 'image/png' }),
   lookupFragment: vi.fn().mockResolvedValue({ path: 'aem', url: '' }),
   uploadMedia: vi.fn().mockResolvedValue({ success: true, path: 'aem' }),
+  previewContent: vi.fn().mockResolvedValue({ success: true, path: 'aem' }),
+  unpreviewContent: vi.fn().mockResolvedValue({ success: true, path: 'aem' }),
+  publishContent: vi.fn().mockResolvedValue({ success: true, path: 'aem' }),
+  unpublishContent: vi.fn().mockResolvedValue({ success: true, path: 'aem' }),
   getFlags: vi.fn().mockResolvedValue({}),
 };
 
@@ -79,6 +87,10 @@ describe('AdminClient', () => {
     { method: 'lookupMedia', args: ['acme', 'site1', 'media/image.png'] },
     { method: 'lookupFragment', args: ['acme', 'site1', 'fragments/footer.html'] },
     { method: 'uploadMedia', args: ['acme', 'site1', 'media/file.txt', 'base64', 'text/plain', 'file.txt'] },
+    { method: 'previewContent', args: ['acme', 'site1', 'docs/page.html'] },
+    { method: 'unpreviewContent', args: ['acme', 'site1', 'docs/page.html'] },
+    { method: 'publishContent', args: ['acme', 'site1', 'docs/page.html'] },
+    { method: 'unpublishContent', args: ['acme', 'site1', 'docs/page.html'] },
   ];
 
   describe.each(methodCalls)('$method', ({ method, args }) => {

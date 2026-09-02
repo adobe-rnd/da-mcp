@@ -170,3 +170,72 @@ describe('DAAdminClient.getFlags', () => {
     logSpy.mockRestore();
   });
 });
+
+describe('DAAdminClient preview/publish', () => {
+  it('previewContent POSTs to /preview/{org}/{repo}/main/{path} with x-content-source-authorization set to the same bearer value as Authorization', async () => {
+    const daadminService = createFakeDaadminService(new Response('', { status: 200, headers: {} }));
+    const client = new DAAdminClient({ apiToken: 'my-token', daadminService });
+
+    const result = await client.previewContent('acme', 'site1', 'docs/page.html');
+
+    const request = daadminService.fetch.mock.calls[0][0] as Request;
+    expect(request.url).toBe('https://admin.da.live/preview/acme/site1/main/docs/page.html');
+    expect(request.method).toBe('POST');
+    expect(request.headers.get('Authorization')).toBe('Bearer my-token');
+    expect(request.headers.get('x-content-source-authorization')).toBe('Bearer my-token');
+    expect(result).toEqual({
+      success: true,
+      path: 'docs/page.html',
+      previewUrl: 'https://main--site1--acme.aem.page/docs/page',
+      liveUrl: 'https://main--site1--acme.aem.live/docs/page',
+    });
+  });
+
+  it('unpreviewContent DELETEs /preview/{org}/{repo}/main/{path} without x-content-source-authorization', async () => {
+    const daadminService = createFakeDaadminService(
+      new Response(null, { status: 204, headers: {} }),
+    );
+    const client = new DAAdminClient({ apiToken: 'my-token', daadminService });
+
+    const result = await client.unpreviewContent('acme', 'site1', 'docs/page.html');
+
+    const request = daadminService.fetch.mock.calls[0][0] as Request;
+    expect(request.url).toBe('https://admin.da.live/preview/acme/site1/main/docs/page.html');
+    expect(request.method).toBe('DELETE');
+    expect(request.headers.get('x-content-source-authorization')).toBeNull();
+    expect(result).toEqual({ success: true, path: 'docs/page.html' });
+  });
+
+  it('publishContent POSTs to /live/{org}/{repo}/main/{path} without x-content-source-authorization', async () => {
+    const daadminService = createFakeDaadminService(new Response('', { status: 200, headers: {} }));
+    const client = new DAAdminClient({ apiToken: 'my-token', daadminService });
+
+    const result = await client.publishContent('acme', 'site1', 'docs/page.html');
+
+    const request = daadminService.fetch.mock.calls[0][0] as Request;
+    expect(request.url).toBe('https://admin.da.live/live/acme/site1/main/docs/page.html');
+    expect(request.method).toBe('POST');
+    expect(request.headers.get('x-content-source-authorization')).toBeNull();
+    expect(result).toEqual({
+      success: true,
+      path: 'docs/page.html',
+      previewUrl: 'https://main--site1--acme.aem.page/docs/page',
+      liveUrl: 'https://main--site1--acme.aem.live/docs/page',
+    });
+  });
+
+  it('unpublishContent DELETEs /live/{org}/{repo}/main/{path} without x-content-source-authorization', async () => {
+    const daadminService = createFakeDaadminService(
+      new Response(null, { status: 204, headers: {} }),
+    );
+    const client = new DAAdminClient({ apiToken: 'my-token', daadminService });
+
+    const result = await client.unpublishContent('acme', 'site1', 'docs/page.html');
+
+    const request = daadminService.fetch.mock.calls[0][0] as Request;
+    expect(request.url).toBe('https://admin.da.live/live/acme/site1/main/docs/page.html');
+    expect(request.method).toBe('DELETE');
+    expect(request.headers.get('x-content-source-authorization')).toBeNull();
+    expect(result).toEqual({ success: true, path: 'docs/page.html' });
+  });
+});

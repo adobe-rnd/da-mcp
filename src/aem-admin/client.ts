@@ -314,4 +314,28 @@ export class AemAdminClient implements IAdminClient {
 
     return { success: true, path };
   }
+
+  async previewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const endpoint = `/${org}/sites/${repo}/preview/${path}`;
+    await this.request<unknown>(endpoint, { method: 'POST' });
+    return { success: true, path, ...buildAemUrls(org, repo, path) };
+  }
+
+  async unpreviewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const endpoint = `/${org}/sites/${repo}/preview/${path}`;
+    await this.request<unknown>(endpoint, { method: 'DELETE' });
+    return { success: true, path };
+  }
+
+  async publishContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const endpoint = `/${org}/sites/${repo}/live/${path}`;
+    await this.request<unknown>(endpoint, { method: 'POST' });
+    return { success: true, path, ...buildAemUrls(org, repo, path) };
+  }
+
+  async unpublishContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const endpoint = `/${org}/sites/${repo}/live/${path}`;
+    await this.request<unknown>(endpoint, { method: 'DELETE' });
+    return { success: true, path };
+  }
 }

@@ -42,6 +42,7 @@ export class AdminClient implements IAdminClient {
       apiToken: options.apiToken,
       daadminService: options.daadminService,
       timeout: options.timeout,
+      hlxAdminBaseUrl: options.hlxAdminBaseUrl,
     });
     this.aem = new AemAdminClient({
       apiToken: options.apiToken,

@@ -61,6 +61,8 @@ vi.mock('../../src/aem-admin/client', () => ({
 // Imported after the mocks so the mocked modules are in place.
 // eslint-disable-next-line import/first
 import { AdminClient } from '../../src/admin/admin-client';
+// eslint-disable-next-line import/first
+import { DAAdminClient } from '../../src/da-admin/client';
 
 describe('AdminClient', () => {
   let client: AdminClient;
@@ -137,6 +139,20 @@ describe('AdminClient', () => {
     expect(isHlx6Mock).toHaveBeenCalledWith('acme', 'site1', kv, {
       pingBaseUrl: 'https://custom.example.com',
     });
+  });
+
+  it('threads hlxAdminBaseUrl into the DAAdminClient constructor, since admin.da.live has no preview/live routes of its own', () => {
+    // eslint-disable-next-line no-new
+    new AdminClient({
+      apiToken: 'token',
+      daadminService: {} as any,
+      kv,
+      hlxAdminBaseUrl: 'https://custom.example.com',
+    });
+
+    expect(DAAdminClient).toHaveBeenCalledWith(expect.objectContaining({
+      hlxAdminBaseUrl: 'https://custom.example.com',
+    }));
   });
 });
 

@@ -16,6 +16,7 @@ import {
 } from './types';
 import { buildEditUrl, buildAemUrls } from '../utils/path';
 import { FlagRow, rowsToMap } from '../utils/flags';
+import { DEFAULT_HLX_ADMIN_BASE_URL } from '../admin/detect';
 
 interface DASourceResponse {
   aem?: { previewUrl?: string; liveUrl?: string };
@@ -41,10 +42,13 @@ export class DAAdminClient implements IAdminClient {
 
   private timeout: number;
 
+  private hlxAdminBaseUrl: string;
+
   constructor(options: DAAdminClientOptions) {
     this.apiToken = options.apiToken;
     this.daadminService = options.daadminService;
     this.timeout = options.timeout || 30000; // 30 seconds default
+    this.hlxAdminBaseUrl = options.hlxAdminBaseUrl || DEFAULT_HLX_ADMIN_BASE_URL;
   }
 
   /**
@@ -451,19 +455,89 @@ export class DAAdminClient implements IAdminClient {
   }
 
   /**
-   * Preview (create/update) a document. Always targets the `main` ref —
-   * admin.da.live org/repos map 1:1 to a single hlx site/branch, so unlike
-   * the classic admin.hlx.page API's {org}/{repo}/{ref}/{path} shape,
-   * there's no separate ref to thread through here.
+   * Make an authenticated request directly to the Helix admin API
+   * (admin.hlx.page), for the one family of operations — preview/live —
+   * that admin.da.live does not itself expose. Unlike request() this
+   * calls global fetch() directly rather than going through the
+   * daadminService binding, since admin.hlx.page is a plain external
+   * host, not the da-admin worker. Structurally mirrors AemAdminClient's
+   * request(), which talks to its own external host the same way.
+   */
+  private async requestHlx<T>(
+    endpoint: string,
+    options: RequestInit & { headers?: Record<string, string> } = {},
+  ): Promise<T> {
+    const method = options.method || 'GET';
+    console.log(`Helix Admin API Call: Method: ${method} Endpoint: ${endpoint}`);
+
+    const headers = new Headers(options.headers || {});
+    headers.set('Authorization', `Bearer ${this.apiToken}`);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    const startTime = Date.now();
+
+    try {
+      const response = await fetch(`${this.hlxAdminBaseUrl}${endpoint}`, {
+        ...options,
+        headers,
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      const duration = Date.now() - startTime;
+      console.log('Helix Admin API Response:', response.status, response.statusText, `(${duration}ms)`);
+
+      if (!response.ok) {
+        const error: DAAPIError = { status: response.status, message: response.statusText, backend: 'da-admin' };
+        try {
+          const errorData: any = await response.json();
+          error.details = errorData;
+          error.message = errorData.message || error.message;
+        } catch {
+          // response body was not JSON, keep statusText
+        }
+        console.log('Helix Admin API Error:', JSON.stringify(error, null, 2));
+        throw error;
+      }
+
+      const contentType = response.headers.get('content-type');
+      const body = await response.text();
+      if (!body) {
+        return {} as unknown as T;
+      }
+      if (contentType?.includes('application/json')) {
+        return JSON.parse(body) as T;
+      }
+      return body as unknown as T;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Helix Admin API Timeout after', this.timeout, 'ms');
+        const timeoutError = new Error('Request timeout') as Error & DAAPIError;
+        timeoutError.status = 408;
+        timeoutError.backend = 'da-admin';
+        throw timeoutError;
+      }
+      console.log('Helix Admin API Request Failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Preview (create/update) a document. admin.da.live has no preview/live
+   * routes of its own — these go straight to the Helix admin API
+   * (admin.hlx.page), via requestHlx() above, always targeting the `main`
+   * ref (DA org/repos map 1:1 to a single hlx site/branch).
    *
    * Sends x-content-source-authorization alongside Authorization: this
-   * preview call fetches/renders content from the source, which the
-   * legacy backend requires a content-source credential for. The other
-   * three operations here don't fetch content, so they don't need it.
+   * preview call fetches/renders content from the source, which Helix
+   * requires a content-source credential for. The other three operations
+   * here don't fetch content, so they don't need it.
    */
   async previewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
     const endpoint = `/preview/${org}/${repo}/main/${path}`;
-    await this.request<unknown>(endpoint, {
+    await this.requestHlx<unknown>(endpoint, {
       method: 'POST',
       headers: { 'x-content-source-authorization': `Bearer ${this.apiToken}` },
     });
@@ -475,7 +549,7 @@ export class DAAdminClient implements IAdminClient {
    */
   async unpreviewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
     const endpoint = `/preview/${org}/${repo}/main/${path}`;
-    await this.request<unknown>(endpoint, { method: 'DELETE' });
+    await this.requestHlx<unknown>(endpoint, { method: 'DELETE' });
     return { success: true, path };
   }
 
@@ -484,7 +558,7 @@ export class DAAdminClient implements IAdminClient {
    */
   async publishContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
     const endpoint = `/live/${org}/${repo}/main/${path}`;
-    await this.request<unknown>(endpoint, { method: 'POST' });
+    await this.requestHlx<unknown>(endpoint, { method: 'POST' });
     return { success: true, path, ...buildAemUrls(org, repo, path) };
   }
 
@@ -493,7 +567,7 @@ export class DAAdminClient implements IAdminClient {
    */
   async unpublishContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
     const endpoint = `/live/${org}/${repo}/main/${path}`;
-    await this.request<unknown>(endpoint, { method: 'DELETE' });
+    await this.requestHlx<unknown>(endpoint, { method: 'DELETE' });
     return { success: true, path };
   }
 }

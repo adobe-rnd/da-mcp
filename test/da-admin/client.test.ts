@@ -170,3 +170,120 @@ describe('DAAdminClient.getFlags', () => {
     logSpy.mockRestore();
   });
 });
+
+describe('DAAdminClient preview/publish', () => {
+  // admin.da.live has no preview/live routes of its own — these four operations go
+  // straight to the Helix admin API (admin.hlx.page) via global fetch(), not through
+  // the daadminService binding, so they're stubbed the same way as AemAdminClient's
+  // tests rather than via createFakeDaadminService.
+  let fetchMock: ReturnType<typeof vi.fn>;
+  let client: DAAdminClient;
+
+  beforeEach(() => {
+    fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    client = new DAAdminClient({
+      apiToken: 'my-token',
+      daadminService: createFakeDaadminService(new Response('', { status: 200, headers: {} })),
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('previewContent POSTs to admin.hlx.page /preview/{org}/{repo}/main/{path} with x-content-source-authorization set to the same bearer value as Authorization, using the response body\'s own previewUrl and falling back to the computed liveUrl', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({
+      preview: { status: 200, url: 'https://custom-branch--site1--acme.aem.page/docs/page' },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+
+    const result = await client.previewContent('acme', 'site1', 'docs/page.html');
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://admin.hlx.page/preview/acme/site1/main/docs/page.html');
+    expect(init.method).toBe('POST');
+    const headers = new Headers(init.headers);
+    expect(headers.get('Authorization')).toBe('Bearer my-token');
+    expect(headers.get('x-content-source-authorization')).toBe('Bearer my-token');
+    expect(result).toEqual({
+      success: true,
+      path: 'docs/page.html',
+      previewUrl: 'https://custom-branch--site1--acme.aem.page/docs/page',
+      liveUrl: 'https://main--site1--acme.aem.live/docs/page',
+    });
+  });
+
+  it('unpreviewContent DELETEs admin.hlx.page /preview/{org}/{repo}/main/{path} without x-content-source-authorization', async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 204, headers: {} }));
+
+    const result = await client.unpreviewContent('acme', 'site1', 'docs/page.html');
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://admin.hlx.page/preview/acme/site1/main/docs/page.html');
+    expect(init.method).toBe('DELETE');
+    expect(new Headers(init.headers).get('x-content-source-authorization')).toBeNull();
+    expect(result).toEqual({ success: true, path: 'docs/page.html' });
+  });
+
+  it('publishContent POSTs to admin.hlx.page /live/{org}/{repo}/main/{path} without x-content-source-authorization, using the response body\'s own liveUrl and falling back to the computed previewUrl', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({
+      live: { status: 200, url: 'https://custom-branch--site1--acme.aem.live/docs/page' },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+
+    const result = await client.publishContent('acme', 'site1', 'docs/page.html');
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://admin.hlx.page/live/acme/site1/main/docs/page.html');
+    expect(init.method).toBe('POST');
+    expect(new Headers(init.headers).get('x-content-source-authorization')).toBeNull();
+    expect(result).toEqual({
+      success: true,
+      path: 'docs/page.html',
+      previewUrl: 'https://main--site1--acme.aem.page/docs/page',
+      liveUrl: 'https://custom-branch--site1--acme.aem.live/docs/page',
+    });
+  });
+
+  it('unpublishContent DELETEs admin.hlx.page /live/{org}/{repo}/main/{path} without x-content-source-authorization', async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 204, headers: {} }));
+
+    const result = await client.unpublishContent('acme', 'site1', 'docs/page.html');
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://admin.hlx.page/live/acme/site1/main/docs/page.html');
+    expect(init.method).toBe('DELETE');
+    expect(new Headers(init.headers).get('x-content-source-authorization')).toBeNull();
+    expect(result).toEqual({ success: true, path: 'docs/page.html' });
+  });
+
+  it('surfaces the x-error response header on a non-ok response, without tagging the error as a da-admin failure', async () => {
+    fetchMock.mockResolvedValue(new Response('', {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: { 'x-error': 'invalid path: docs/page.html' },
+    }));
+
+    expect.assertions(3);
+    try {
+      await client.previewContent('acme', 'site1', 'docs/page.html');
+    } catch (error: any) {
+      expect(error.status).toBe(400);
+      expect(error.details).toEqual({ xError: 'invalid path: docs/page.html' });
+      expect(error.backend).toBeUndefined();
+    }
+  });
+
+  it('does not tag a timeout as a da-admin failure', async () => {
+    fetchMock.mockImplementation(() => new Promise((_resolve, reject) => {
+      reject(Object.assign(new Error('The operation was aborted'), { name: 'AbortError' }));
+    }));
+
+    expect.assertions(2);
+    try {
+      await client.publishContent('acme', 'site1', 'docs/page.html');
+    } catch (error: any) {
+      expect(error.status).toBe(408);
+      expect(error.backend).toBeUndefined();
+    }
+  });
+});

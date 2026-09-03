@@ -21,6 +21,10 @@ import {
   handleLookupMedia,
   handleUploadMedia,
   handleLookupFragment,
+  handlePreviewContent,
+  handleUnpreviewContent,
+  handlePublishContent,
+  handleUnpublishContent,
 } from './handlers';
 
 /**
@@ -193,6 +197,48 @@ export function createServer(client: IAdminClient, version: string): McpServer {
     }),
     annotations: { readOnlyHint: false, idempotentHint: true },
   }, (args) => handleUploadMedia(client, args) as Promise<CallToolResult>);
+
+  server.registerTool('da_preview_content', {
+    description: 'Preview a document, publishing it to the AEM Edge Delivery preview environment. '
+      + 'Simple (non-bulk) preview only.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Site / Repository name'),
+      path: z.string().describe('Path to the page to preview. Any file extension (e.g. ".html") is stripped automatically, since preview URLs never include one.'),
+    }),
+    annotations: { readOnlyHint: false, idempotentHint: true },
+  }, (args) => handlePreviewContent(client, args) as Promise<CallToolResult>);
+
+  server.registerTool('da_unpreview_content', {
+    description: 'Remove a document\'s preview from the AEM Edge Delivery preview environment.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Site / Repository name'),
+      path: z.string().describe('Path to the page to unpreview. Any file extension (e.g. ".html") is stripped automatically, since preview URLs never include one.'),
+    }),
+    annotations: { readOnlyHint: false, idempotentHint: true, destructiveHint: true },
+  }, (args) => handleUnpreviewContent(client, args) as Promise<CallToolResult>);
+
+  server.registerTool('da_publish_content', {
+    description: 'Publish a document to the AEM Edge Delivery live environment. '
+      + 'Simple (non-bulk) publish only.',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Site / Repository name'),
+      path: z.string().describe('Path to the page to publish. Any file extension (e.g. ".html") is stripped automatically, since live URLs never include one.'),
+    }),
+    annotations: { readOnlyHint: false, idempotentHint: true },
+  }, (args) => handlePublishContent(client, args) as Promise<CallToolResult>);
+
+  server.registerTool('da_unpublish_content', {
+    description: 'Remove a document from the AEM Edge Delivery live environment (unpublish).',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name'),
+      repo: z.string().describe('Site / Repository name'),
+      path: z.string().describe('Path to the page to unpublish. Any file extension (e.g. ".html") is stripped automatically, since live URLs never include one.'),
+    }),
+    annotations: { readOnlyHint: false, idempotentHint: true, destructiveHint: true },
+  }, (args) => handleUnpublishContent(client, args) as Promise<CallToolResult>);
 
   return server;
 }

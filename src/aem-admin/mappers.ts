@@ -1,7 +1,10 @@
 import {
   DASource, DAListSourcesResponse, DAVersion, DAVersionsResponse, DAOperationResponse,
 } from '../da-admin/types';
-import { AemFolderListingEntry, AemVersionListingEntry, AemCopyResponse } from './types';
+import {
+  AemFolderListingEntry, AemVersionListingEntry, AemCopyResponse, AemPreviewLiveResponse,
+} from './types';
+import { buildAemUrls } from '../utils/path';
 
 /**
  * Derives the display name DA's own legacy /list endpoint uses:
@@ -58,5 +61,20 @@ export function mapCopyResponse(
   return {
     success: true,
     path: entry?.dst || destinationPath,
+  };
+}
+
+export function mapPreviewLiveResponse(
+  response: AemPreviewLiveResponse,
+  org: string,
+  repo: string,
+  path: string,
+): DAOperationResponse {
+  const computed = buildAemUrls(org, repo, path);
+  return {
+    success: true,
+    path,
+    previewUrl: response.preview?.url ?? computed.previewUrl,
+    liveUrl: response.live?.url ?? computed.liveUrl,
   };
 }

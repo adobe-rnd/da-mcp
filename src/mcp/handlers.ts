@@ -4,7 +4,7 @@
  */
 
 import { DAAPIError, IAdminClient } from '../da-admin/types';
-import { normalizePath, normalizePagePath } from '../utils/path';
+import { normalizePath, normalizePagePath, stripFileExtension } from '../utils/path';
 
 /**
  * Format error for MCP client
@@ -480,6 +480,130 @@ export async function handleUploadMedia(
             mimeType: args.mimeType,
             ...response,
           }, null, 2),
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: formatError(error),
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
+/**
+ * Handler for da_preview_content tool
+ */
+export async function handlePreviewContent(
+  client: IAdminClient,
+  args: { org: string; repo: string; path: string },
+) {
+  try {
+    const normalizedPath = stripFileExtension(normalizePath(args.path)!);
+    const response = await client.previewContent(args.org, args.repo, normalizedPath);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(response, null, 2),
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: formatError(error),
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
+/**
+ * Handler for da_unpreview_content tool
+ */
+export async function handleUnpreviewContent(
+  client: IAdminClient,
+  args: { org: string; repo: string; path: string },
+) {
+  try {
+    const normalizedPath = stripFileExtension(normalizePath(args.path)!);
+    const response = await client.unpreviewContent(args.org, args.repo, normalizedPath);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(response, null, 2),
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: formatError(error),
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
+/**
+ * Handler for da_publish_content tool
+ */
+export async function handlePublishContent(
+  client: IAdminClient,
+  args: { org: string; repo: string; path: string },
+) {
+  try {
+    const normalizedPath = stripFileExtension(normalizePath(args.path)!);
+    const response = await client.publishContent(args.org, args.repo, normalizedPath);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(response, null, 2),
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: formatError(error),
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
+/**
+ * Handler for da_unpublish_content tool
+ */
+export async function handleUnpublishContent(
+  client: IAdminClient,
+  args: { org: string; repo: string; path: string },
+) {
+  try {
+    const normalizedPath = stripFileExtension(normalizePath(args.path)!);
+    const response = await client.unpublishContent(args.org, args.repo, normalizedPath);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(response, null, 2),
         },
       ],
     };

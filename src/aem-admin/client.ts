@@ -18,9 +18,12 @@ import {
   AemAdminClientOptions,
   AemCopyResponse,
   AemFolderListingEntry,
+  AemPreviewLiveResponse,
   AemVersionListingEntry,
 } from './types';
-import { mapCopyResponse, mapFolderListing, mapVersionListing } from './mappers';
+import {
+  mapCopyResponse, mapFolderListing, mapPreviewLiveResponse, mapVersionListing,
+} from './mappers';
 import { buildEditUrl, buildAemUrls } from '../utils/path';
 import { rowsToMap } from '../utils/flags';
 
@@ -312,6 +315,30 @@ export class AemAdminClient implements IAdminClient {
       headers: { 'Content-Type': mimeType },
     });
 
+    return { success: true, path };
+  }
+
+  async previewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const endpoint = `/${org}/sites/${repo}/preview/${path}`;
+    const raw = await this.request<AemPreviewLiveResponse>(endpoint, { method: 'POST' });
+    return mapPreviewLiveResponse(raw, org, repo, path);
+  }
+
+  async unpreviewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const endpoint = `/${org}/sites/${repo}/preview/${path}`;
+    await this.request<unknown>(endpoint, { method: 'DELETE' });
+    return { success: true, path };
+  }
+
+  async publishContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const endpoint = `/${org}/sites/${repo}/live/${path}`;
+    const raw = await this.request<AemPreviewLiveResponse>(endpoint, { method: 'POST' });
+    return mapPreviewLiveResponse(raw, org, repo, path);
+  }
+
+  async unpublishContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const endpoint = `/${org}/sites/${repo}/live/${path}`;
+    await this.request<unknown>(endpoint, { method: 'DELETE' });
     return { success: true, path };
   }
 }

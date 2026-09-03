@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DA MCP is a remote Model Context Protocol (MCP) server for Document Authoring (DA). It provides LLM assistants with direct access to DA management operations via Cloudflare Workers with streamable HTTP transport.
 
-**Architecture flow:** MCP Client → Cloudflare Worker (11 tools) → DA Admin API (admin.da.live)
+**Architecture flow:** MCP Client → Cloudflare Worker (17 tools) → DA Admin API (admin.da.live) or AEM (HLX6) Admin API (api.aem.live); legacy preview/publish calls go to the Helix admin API (admin.hlx.page) instead
 
 ## Development Commands
 
@@ -51,7 +51,9 @@ src/
 - **Copy/move API:** Endpoint is `/copy|move/{org}/{repo}/{sourcePath}`; body is FormData with `destination` = `/{org}/{repo}/{destinationPath}`
 - **Empty responses:** `client.ts` reads body as text first; returns `{}` for empty/no-content responses (204 etc.)
 - **30-second timeout:** All API requests have AbortController timeout
-- **Path normalization:** All handlers normalize paths via `src/utils/path.ts` before passing to client; `.html` extension auto-added where needed
+- **Path normalization:** All handlers normalize paths via `src/utils/path.ts` before passing to client; `.html` extension auto-added where needed for source file operations, but **stripped** for preview/publish (see below) since those are page/URL paths, not source file paths
+- **Preview/live on legacy DA:** `admin.da.live` has no preview/live routes of its own — `DAAdminClient.previewContent/unpreviewContent/publishContent/unpublishContent` call the Helix admin API (`admin.hlx.page`) directly via global `fetch()` instead of the `daadminService` binding, always targeting the `main` ref. Preview `POST` calls additionally send `x-content-source-authorization` alongside `Authorization`.
+- **Preview/live paths have no file extension:** on both legacy and HLX6, `da_preview_content`/`da_unpreview_content`/`da_publish_content`/`da_unpublish_content` strip any extension from the given path via `stripFileExtension()` (`src/utils/path.ts`) before calling the client — AEM Edge Delivery preview/live URLs are always extensionless page routes.
 
 ## Tools
 
@@ -72,6 +74,10 @@ All tools accept `org` and `repo` parameters plus operation-specific params:
 | `da_lookup_media` | Get media asset info |
 | `da_lookup_fragment` | Get fragment info |
 | `da_upload_media` | Upload binary media file |
+| `da_preview_content` | Preview (create/update) a document |
+| `da_unpreview_content` | Remove a document's preview |
+| `da_publish_content` | Publish a document to live |
+| `da_unpublish_content` | Remove a document from live (unpublish) |
 
 ## Deployment
 

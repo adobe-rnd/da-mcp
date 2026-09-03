@@ -30,6 +30,16 @@ export interface AemCopyResponse {
   copied?: AemCopyMoveEntry[];
 }
 
+export interface AemPreviewLiveInfo {
+  status: number;
+  url: string;
+}
+
+export interface AemPreviewLiveResponse {
+  preview?: AemPreviewLiveInfo;
+  live?: AemPreviewLiveInfo;
+}
+
 export interface AemAdminClientOptions {
   apiToken: string;
   baseUrl?: string;

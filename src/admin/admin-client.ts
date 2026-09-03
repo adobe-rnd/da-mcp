@@ -241,4 +241,24 @@ export class AdminClient implements IAdminClient {
     const { client } = await this.resolveClient(org, repo);
     return client.uploadMedia(org, repo, path, base64Data, mimeType, fileName);
   }
+
+  async previewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const { client } = await this.resolveClient(org, repo);
+    return client.previewContent(org, repo, path);
+  }
+
+  async unpreviewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const { client } = await this.resolveClient(org, repo);
+    return client.unpreviewContent(org, repo, path);
+  }
+
+  async publishContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const { client } = await this.resolveClient(org, repo);
+    return client.publishContent(org, repo, path);
+  }
+
+  async unpublishContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {
+    const { client } = await this.resolveClient(org, repo);
+    return client.unpublishContent(org, repo, path);
+  }
 }

@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/adobe-rnd/da-mcp/compare/v1.6.0...v1.7.0) (2026-09-03)
+
+
+### Features
+
+* add preview/publish tools for legacy and HLX6 backends ([#39](https://github.com/adobe-rnd/da-mcp/issues/39)) ([d49341f](https://github.com/adobe-rnd/da-mcp/commit/d49341f47be419a7810d3b32f9e18bfc9f87e9ba))
+
 # [1.6.0](https://github.com/adobe-rnd/da-mcp/compare/v1.5.0...v1.6.0) (2026-08-26)
 
 

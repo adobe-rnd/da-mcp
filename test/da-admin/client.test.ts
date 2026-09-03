@@ -255,4 +255,35 @@ describe('DAAdminClient preview/publish', () => {
     expect(new Headers(init.headers).get('x-content-source-authorization')).toBeNull();
     expect(result).toEqual({ success: true, path: 'docs/page.html' });
   });
+
+  it('surfaces the x-error response header on a non-ok response, without tagging the error as a da-admin failure', async () => {
+    fetchMock.mockResolvedValue(new Response('', {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: { 'x-error': 'invalid path: docs/page.html' },
+    }));
+
+    expect.assertions(3);
+    try {
+      await client.previewContent('acme', 'site1', 'docs/page.html');
+    } catch (error: any) {
+      expect(error.status).toBe(400);
+      expect(error.details).toEqual({ xError: 'invalid path: docs/page.html' });
+      expect(error.backend).toBeUndefined();
+    }
+  });
+
+  it('does not tag a timeout as a da-admin failure', async () => {
+    fetchMock.mockImplementation(() => new Promise((_resolve, reject) => {
+      reject(Object.assign(new Error('The operation was aborted'), { name: 'AbortError' }));
+    }));
+
+    expect.assertions(2);
+    try {
+      await client.publishContent('acme', 'site1', 'docs/page.html');
+    } catch (error: any) {
+      expect(error.status).toBe(408);
+      expect(error.backend).toBeUndefined();
+    }
+  });
 });

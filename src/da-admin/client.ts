@@ -460,7 +460,12 @@ export class DAAdminClient implements IAdminClient {
    * calls global fetch() directly rather than going through the
    * daadminService binding, since admin.hlx.page is a plain external
    * host, not the da-admin worker. Structurally mirrors AemAdminClient's
-   * request(), which talks to its own external host the same way.
+   * request(), which talks to its own external host the same way —
+   * including reading the x-error response header — and, like it,
+   * leaves `backend` unset on errors (formatError() then falls back to
+   * the generic "Admin API Error" label) rather than tagging them
+   * 'da-admin', since that would misleadingly suggest an admin.da.live
+   * failure.
    */
   private async requestHlx<T>(
     endpoint: string,
@@ -488,10 +493,14 @@ export class DAAdminClient implements IAdminClient {
       console.log('Helix Admin API Response:', response.status, response.statusText, `(${duration}ms)`);
 
       if (!response.ok) {
-        const error: DAAPIError = { status: response.status, message: response.statusText, backend: 'da-admin' };
+        const error: DAAPIError = { status: response.status, message: response.statusText };
+        const xError = response.headers.get('x-error');
+        if (xError) {
+          error.details = { ...error.details, xError };
+        }
         try {
           const errorData: any = await response.json();
-          error.details = errorData;
+          error.details = { ...error.details, ...errorData };
           error.message = errorData.message || error.message;
         } catch {
           // response body was not JSON, keep statusText
@@ -515,7 +524,6 @@ export class DAAdminClient implements IAdminClient {
         console.log('Helix Admin API Timeout after', this.timeout, 'ms');
         const timeoutError = new Error('Request timeout') as Error & DAAPIError;
         timeoutError.status = 408;
-        timeoutError.backend = 'da-admin';
         throw timeoutError;
       }
       console.log('Helix Admin API Request Failed:', error);

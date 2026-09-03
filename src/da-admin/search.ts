@@ -9,7 +9,7 @@
  * can't exhaust the Worker's subrequest / CPU limits.
  */
 
-import { DASource, IAdminClient } from './types';
+import { DAListSourcesResponse, DASource, IAdminClient } from './types';
 
 export interface SearchSourcesParams {
   org: string;
@@ -46,8 +46,17 @@ export interface SearchResult {
   scanned: { directories: number; files: number; contentFetched: number };
   /** True when a budget cap stopped the search before the tree was exhausted. */
   truncated: boolean;
+  /** True when the scope `path` itself does not exist (a 404 from the list API). */
+  notFound?: boolean;
+  /** Human-readable note, e.g. why a search returned nothing. */
+  message?: string;
   deferred: string[];
 }
+
+const DEFERRED = [
+  'author filter (creator/last modifier) — not in the list response; needs a per-file getVersions lookup',
+  'semantic search — needs an embeddings index, tracked as the issue\'s bonus item',
+];
 
 const DEFAULT_MAX_DEPTH = 4;
 const DEFAULT_MAX_RESULTS = 50;
@@ -129,39 +138,69 @@ export async function searchSources(
   // Breadth-first, one level at a time so a single depth cap is easy to reason
   // about and each level's directory listings run in parallel.
   const candidates: SearchMatch[] = [];
-  let frontier = [{ relPath: params.path?.replace(/^\/+|\/+$/g, '') ?? '', depth: 0 }];
+  const rootPath = params.path?.replace(/^\/+|\/+$/g, '') ?? '';
+  type Dir = { relPath: string; depth: number };
+
+  // Fold one directory listing into matched files (candidates) and the child
+  // directories to descend into next.
+  const collect = (listing: DAListSourcesResponse, dir: Dir, next: Dir[]) => {
+    (listing.sources ?? []).forEach((source) => {
+      const childPath = dir.relPath ? `${dir.relPath}/${source.name}` : source.name;
+      if (source.type === 'directory') {
+        if (dir.depth < maxDepth) next.push({ relPath: childPath, depth: dir.depth + 1 });
+        return;
+      }
+      scanned.files += 1;
+      const keep = passesMetadataFilters(source, childPath, sinceMs, untilMs, ext, nameContains);
+      if (keep) {
+        candidates.push({
+          path: childPath,
+          name: source.name,
+          lastModified: source.lastModified,
+          size: source.size,
+        });
+      }
+    });
+  };
+
+  // Probe the scope path explicitly. A 404 here means the path doesn't exist —
+  // a normal empty outcome for a search, not a tool error — so we return it as a
+  // real result carrying the reason rather than throwing. Any other failure is a
+  // genuine error and propagates (the handler surfaces the server status/code).
+  let frontier: Dir[] = [];
+  const root: Dir = { relPath: rootPath, depth: 0 };
+  try {
+    const rootListing = await client.listSources(params.org, params.repo, rootPath);
+    scanned.directories += 1;
+    collect(rootListing, root, frontier);
+  } catch (error) {
+    if ((error as { status?: number })?.status === 404) {
+      return {
+        matches: [],
+        scanned,
+        truncated: false,
+        notFound: true,
+        message: `Path not found: ${rootPath || '(root)'}`,
+        deferred: DEFERRED,
+      };
+    }
+    throw error;
+  }
 
   /* eslint-disable no-await-in-loop -- BFS runs level-by-level to honor the scan budget */
   while (frontier.length > 0 && scanned.directories < MAX_DIR_SCAN) {
     const level = frontier.slice(0, MAX_DIR_SCAN - scanned.directories);
     if (level.length < frontier.length) truncated = true;
 
+    // Best-effort below the root: a subdirectory that fails to list is skipped.
     const listings = await Promise.allSettled(
       level.map((dir) => client.listSources(params.org, params.repo, dir.relPath)),
     );
     scanned.directories += level.length;
 
-    const nextFrontier: typeof frontier = [];
+    const nextFrontier: Dir[] = [];
     listings.forEach((listing, i) => {
-      if (listing.status !== 'fulfilled') return;
-      const { relPath, depth } = level[i];
-      (listing.value.sources ?? []).forEach((source) => {
-        const childPath = relPath ? `${relPath}/${source.name}` : source.name;
-        if (source.type === 'directory') {
-          if (depth < maxDepth) nextFrontier.push({ relPath: childPath, depth: depth + 1 });
-          return;
-        }
-        scanned.files += 1;
-        const keep = passesMetadataFilters(source, childPath, sinceMs, untilMs, ext, nameContains);
-        if (keep) {
-          candidates.push({
-            path: childPath,
-            name: source.name,
-            lastModified: source.lastModified,
-            size: source.size,
-          });
-        }
-      });
+      if (listing.status === 'fulfilled') collect(listing.value, level[i], nextFrontier);
     });
     frontier = nextFrontier;
   }
@@ -196,9 +235,7 @@ export async function searchSources(
     matches,
     scanned,
     truncated,
-    deferred: [
-      'author filter (creator/last modifier) — not in the list response; needs a per-file getVersions lookup',
-      'semantic search — needs an embeddings index, tracked as the issue\'s bonus item',
-    ],
+    notFound: false,
+    deferred: DEFERRED,
   };
 }

@@ -126,6 +126,28 @@ describe('searchSources', () => {
     expect(result.truncated).toBe(true);
   });
 
+  it('treats a not-found scope path (404) as a normal empty result, not a thrown error', async () => {
+    const client = makeClient({ '': [file('root.html')] });
+
+    // 'missing' is not in the tree, so the root listing 404s.
+    const result = await searchSources(client, { org: 'a', repo: 's', path: 'missing' });
+
+    expect(result.notFound).toBe(true);
+    expect(result.matches).toEqual([]);
+    expect(result.message).toContain('missing');
+  });
+
+  it('propagates a genuine (non-404) failure at the scope path so it surfaces as an error', async () => {
+    const client = {
+      listSources: vi.fn(async () => {
+        throw Object.assign(new Error('Internal Server Error'), { status: 500 });
+      }),
+      getSource: vi.fn(),
+    } as unknown as IAdminClient;
+
+    await expect(searchSources(client, { org: 'a', repo: 's' })).rejects.toMatchObject({ status: 500 });
+  });
+
   it('reports deferred capabilities (author, semantic) so callers know the gaps', async () => {
     const client = makeClient({ '': [file('a.html')] });
     const result = await searchSources(client, { org: 'a', repo: 's' });

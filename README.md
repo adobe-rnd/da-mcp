@@ -1,6 +1,6 @@
 # da-mcp
 
-[![75% Vibe_Coded](https://img.shields.io/badge/75%25-Vibe_Coded-ff69b4?style=for-the-badge&logo=semanticrelease&logoColor=white)](https://github.com/ai-ecoverse/vibe-coded-badge-action)
+[![72% Vibe_Coded](https://img.shields.io/badge/72%25-Vibe_Coded-ff69b4?style=for-the-badge&logo=semanticrelease&logoColor=white)](https://github.com/ai-ecoverse/vibe-coded-badge-action)
 
 A remote Model Context Protocol (MCP) server for Document Authoring (DA). This server provides LLM assistants like Claude or ChatGPT with direct access to DA management operations.
 

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DA MCP is a remote Model Context Protocol (MCP) server for Document Authoring (DA). It provides LLM assistants with direct access to DA management operations via Cloudflare Workers with streamable HTTP transport.
 
-**Architecture flow:** MCP Client → Cloudflare Worker (17 tools) → DA Admin API (admin.da.live) or AEM (HLX6) Admin API (api.aem.live); legacy preview/publish calls go to the Helix admin API (admin.hlx.page) instead
+**Architecture flow:** MCP Client → Cloudflare Worker (18 tools) → DA Admin API (admin.da.live) or AEM (HLX6) Admin API (api.aem.live); legacy preview/publish calls go to the Helix admin API (admin.hlx.page) instead
 
 ## Development Commands
 
@@ -62,6 +62,7 @@ All tools accept `org` and `repo` parameters plus operation-specific params:
 | Tool | Purpose |
 |------|---------|
 | `da_list_sources` | List files/directories at path |
+| `da_search_sources` | Recursively search by date range, extension, name, and full-text content |
 | `da_get_source` | Get file content |
 | `da_create_source` | Create new file |
 | `da_update_source` | Update existing file |

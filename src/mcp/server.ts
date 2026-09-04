@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { IAdminClient } from '../da-admin/types';
 import {
   handleListSources,
+  handleSearchSources,
   handleGetSource,
   handleCreateSource,
   handleUpdateSource,
@@ -49,6 +50,26 @@ export function createServer(client: IAdminClient, version: string): McpServer {
     }),
     annotations: { readOnlyHint: true },
   }, (args) => handleListSources(client, args) as Promise<CallToolResult>);
+
+  server.registerTool('da_search_sources', {
+    description: 'Search a site for pages/files by metadata and content. Recursively walks the tree under '
+      + 'an optional path and filters by last-modified date range, file extension, name, and full-text content. '
+      + 'Returns matching files with a content snippet when a text query is given. Use this to locate content '
+      + 'without browsing folder by folder (e.g. "html pages changed since 2026-01-01 that mention checkout").',
+    inputSchema: z.object({
+      org: z.string().describe('Organization name (e.g., "adobe")'),
+      repo: z.string().describe('Site / Repository name (e.g., "my-docs")'),
+      path: z.string().optional().describe('Optional path to scope the search to. Leave empty to search from the root.'),
+      modifiedSince: z.string().optional().describe('Only files modified on or after this UTC date (YYYY-MM-DD).'),
+      modifiedUntil: z.string().optional().describe('Only files modified on or before this UTC date (YYYY-MM-DD).'),
+      text: z.string().optional().describe('Case-insensitive text that must appear in the file content (full-text search).'),
+      ext: z.string().optional().describe('File extension to match, with or without the dot (e.g. "html").'),
+      nameContains: z.string().optional().describe('Case-insensitive substring the file name or path must contain.'),
+      maxDepth: z.number().optional().describe('How many directory levels to descend below path. Default 4.'),
+      maxResults: z.number().optional().describe('Maximum number of matches to return. Default 50.'),
+    }),
+    annotations: { readOnlyHint: true },
+  }, (args) => handleSearchSources(client, args) as Promise<CallToolResult>);
 
   server.registerTool('da_get_source', {
     description: 'Get the content of a specific source file from a site. Returns the file content and metadata.',

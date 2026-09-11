@@ -455,6 +455,28 @@ function assertAllowedMimeType(mimeType: string): void {
   }
 }
 
+const MAX_MEDIA_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+
+function assertWithinSizeLimit(byteSize: number): void {
+  if (byteSize > MAX_MEDIA_SIZE_BYTES) {
+    throw new Error(
+      `File is too large (${byteSize} bytes). Maximum allowed size is ${MAX_MEDIA_SIZE_BYTES} bytes (5MB).`,
+    );
+  }
+}
+
+/**
+ * Estimate the decoded byte size of a base64 string without fully decoding it.
+ */
+function estimateBase64ByteSize(base64: string): number {
+  const { length } = base64;
+  if (length === 0) return 0;
+  let padding = 0;
+  if (base64.endsWith('==')) padding = 2;
+  else if (base64.endsWith('=')) padding = 1;
+  return Math.floor((length * 3) / 4) - padding;
+}
+
 /**
  * Encode raw bytes to a base64 string.
  */
@@ -518,6 +540,11 @@ async function fetchMediaFromUrl(
       throw new Error(`Failed to fetch sourceUrl (${response.status} ${response.statusText})`);
     }
 
+    const contentLength = response.headers.get('content-length');
+    if (contentLength) {
+      assertWithinSizeLimit(Number(contentLength));
+    }
+
     const contentType = response.headers.get('content-type');
     const mimeType = (mimeTypeOverride
       || (contentType ? contentType.split(';')[0].trim() : '')
@@ -525,6 +552,7 @@ async function fetchMediaFromUrl(
 
     const arrayBuffer = await response.arrayBuffer();
     const bytes = new Uint8Array(arrayBuffer);
+    assertWithinSizeLimit(bytes.length);
 
     return { base64Data: bytesToBase64(bytes), mimeType, byteSize: bytes.length };
   } catch (error) {
@@ -566,7 +594,7 @@ export async function handleUploadMedia(
 
     let cleanBase64: string;
     let mimeType: string;
-    let byteSize: number | undefined;
+    let byteSize: number;
 
     if (args.mimeType) {
       assertAllowedMimeType(args.mimeType);
@@ -584,9 +612,11 @@ export async function handleUploadMedia(
         [, cleanBase64] = cleanBase64.split(',');
       }
       mimeType = args.mimeType || 'application/octet-stream';
+      byteSize = estimateBase64ByteSize(cleanBase64);
     }
 
     assertAllowedMimeType(mimeType);
+    assertWithinSizeLimit(byteSize);
 
     const fileName = deriveFileName(args.fileName, args.sourceUrl, args.path);
 
@@ -609,7 +639,8 @@ export async function handleUploadMedia(
             path: args.path,
             fileName,
             mimeType,
-            ...(hasSourceUrl ? { sourceUrl: args.sourceUrl, byteSize } : {}),
+            byteSize,
+            ...(hasSourceUrl ? { sourceUrl: args.sourceUrl } : {}),
             ...response,
           }, null, 2),
         },

@@ -182,6 +182,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       + 'or "sourceUrl" (a public http/https URL the server fetches directly, e.g. a Firefly '
       + 'temporary asset URL with a short TTL). When using "sourceUrl", "mimeType" and "fileName" '
       + 'are auto-derived from the response and URL if not provided. '
+      + 'Maximum file size is 5MB; larger files are rejected. '
       + 'When uploading images referenced in a page (e.g. during page creation or update), '
       + 'place the image in a child folder named after the page, sibling to the page file '
       + '(e.g. page at "docs/my-page.html" → image at "docs/.my-page/image.png" with the folder name with a leading dot). '

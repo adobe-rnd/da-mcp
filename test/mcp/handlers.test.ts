@@ -535,6 +535,66 @@ describe('Handler path normalization', () => {
       );
     });
 
+    it('should reject base64Data larger than the 5MB size limit', async () => {
+      const oversizedBase64 = 'A'.repeat(7_000_000); // decodes to > 5MB
+
+      const result = await handleUploadMedia(mockClient, {
+        org: 'test',
+        repo: 'repo',
+        path: 'media/big.png',
+        base64Data: oversizedBase64,
+        mimeType: 'image/png',
+      });
+
+      expect(result.isError).toBe(true);
+      expect(mockClient.uploadMedia).not.toHaveBeenCalled();
+    });
+
+    it('should reject a sourceUrl response whose Content-Length exceeds the size limit', async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        headers: { get: (name: string) => (name.toLowerCase() === 'content-length' ? '10000000' : null) },
+        arrayBuffer: async () => new Uint8Array().buffer,
+      });
+      vi.stubGlobal('fetch', fetchMock);
+
+      const result = await handleUploadMedia(mockClient, {
+        org: 'test',
+        repo: 'repo',
+        path: 'media/big.png',
+        sourceUrl: 'https://firefly.example.com/huge.png',
+        mimeType: 'image/png',
+      });
+
+      expect(result.isError).toBe(true);
+      expect(mockClient.uploadMedia).not.toHaveBeenCalled();
+    });
+
+    it('should reject a sourceUrl response body larger than the size limit even without Content-Length', async () => {
+      const bytes = new Uint8Array(6 * 1024 * 1024); // 6MB, no Content-Length header
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        headers: { get: () => null },
+        arrayBuffer: async () => bytes.buffer,
+      });
+      vi.stubGlobal('fetch', fetchMock);
+
+      const result = await handleUploadMedia(mockClient, {
+        org: 'test',
+        repo: 'repo',
+        path: 'media/big.png',
+        sourceUrl: 'https://firefly.example.com/huge.png',
+        mimeType: 'image/png',
+      });
+
+      expect(result.isError).toBe(true);
+      expect(mockClient.uploadMedia).not.toHaveBeenCalled();
+    });
+
     it('should error when both base64Data and sourceUrl are provided', async () => {
       const result = await handleUploadMedia(mockClient, {
         org: 'test',

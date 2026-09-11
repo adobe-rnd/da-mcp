@@ -201,7 +201,7 @@ export function createServer(client: IAdminClient, version: string): McpServer {
         + 'Provide this OR "base64Data", not both.',
       ),
       mimeType: z.string().optional().describe(
-        'MIME type of the file (e.g., "image/png", "image/jpeg"). '
+        'MIME type of the file. Allowed: "image/svg+xml", "image/jpeg", "image/png", "image/avif", "image/webp". '
         + 'Optional when using "sourceUrl" — derived from the response Content-Type if omitted.',
       ),
       fileName: z.string().optional().describe(

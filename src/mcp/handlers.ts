@@ -439,6 +439,22 @@ export async function handleLookupFragment(
 
 const UPLOAD_FETCH_TIMEOUT = 30000; // 30 seconds, mirrors DAAdminClient
 
+const ALLOWED_MEDIA_MIME_TYPES = new Set([
+  'image/svg+xml',
+  'image/jpeg',
+  'image/png',
+  'image/avif',
+  'image/webp',
+]);
+
+function assertAllowedMimeType(mimeType: string): void {
+  if (!ALLOWED_MEDIA_MIME_TYPES.has(mimeType.toLowerCase())) {
+    throw new Error(
+      `Unsupported mimeType "${mimeType}". Allowed types: ${[...ALLOWED_MEDIA_MIME_TYPES].join(', ')}.`,
+    );
+  }
+}
+
 /**
  * Encode raw bytes to a base64 string.
  */
@@ -552,6 +568,10 @@ export async function handleUploadMedia(
     let mimeType: string;
     let byteSize: number | undefined;
 
+    if (args.mimeType) {
+      assertAllowedMimeType(args.mimeType);
+    }
+
     if (hasSourceUrl) {
       const fetched = await fetchMediaFromUrl(args.sourceUrl!, args.mimeType);
       cleanBase64 = fetched.base64Data;
@@ -565,6 +585,8 @@ export async function handleUploadMedia(
       }
       mimeType = args.mimeType || 'application/octet-stream';
     }
+
+    assertAllowedMimeType(mimeType);
 
     const fileName = deriveFileName(args.fileName, args.sourceUrl, args.path);
 

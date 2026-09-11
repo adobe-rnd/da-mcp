@@ -474,7 +474,7 @@ describe('Handler path normalization', () => {
       );
     });
 
-    it('should fall back to application/octet-stream when no content-type is present', async () => {
+    it('should reject with application/octet-stream when no content-type is present and none is provided', async () => {
       const bytes = new Uint8Array([102, 111, 111]);
       const fetchMock = vi.fn().mockResolvedValue({
         ok: true,
@@ -485,20 +485,53 @@ describe('Handler path normalization', () => {
       });
       vi.stubGlobal('fetch', fetchMock);
 
-      await handleUploadMedia(mockClient, {
+      const result = await handleUploadMedia(mockClient, {
         org: 'test',
         repo: 'repo',
         path: 'media/asset',
         sourceUrl: 'https://firefly.example.com/download',
       });
 
+      expect(result.isError).toBe(true);
+      expect(mockClient.uploadMedia).not.toHaveBeenCalled();
+    });
+
+    it('should reject a disallowed mimeType', async () => {
+      const result = await handleUploadMedia(mockClient, {
+        org: 'test',
+        repo: 'repo',
+        path: 'media/script.js',
+        base64Data: 'Zm9v',
+        mimeType: 'application/javascript',
+      });
+
+      expect(result.isError).toBe(true);
+      expect(mockClient.uploadMedia).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      'image/svg+xml',
+      'image/jpeg',
+      'image/png',
+      'image/avif',
+      'image/webp',
+    ])('should allow mimeType %s', async (mimeType) => {
+      const result = await handleUploadMedia(mockClient, {
+        org: 'test',
+        repo: 'repo',
+        path: 'media/asset',
+        base64Data: 'Zm9v',
+        mimeType,
+      });
+
+      expect(result.isError).toBeUndefined();
       expect(mockClient.uploadMedia).toHaveBeenCalledWith(
         'test',
         'repo',
         'media/asset',
         'Zm9v',
-        'application/octet-stream',
-        'download',
+        mimeType,
+        'asset',
       );
     });
 

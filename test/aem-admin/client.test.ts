@@ -248,7 +248,7 @@ describe('AemAdminClient', () => {
     expect(typeof result.data).toBe('string');
   });
 
-  it('uploadMedia PUTs decoded binary content with the given mime type', async () => {
+  it('uploadMedia POSTs decoded binary content with the given mime type', async () => {
     fetchMock.mockResolvedValue(new Response('', { status: 200, headers: {} }));
     const base64Data = btoa('hello');
 
@@ -263,8 +263,9 @@ describe('AemAdminClient', () => {
 
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe('https://api.aem.live/acme/sites/site1/media/media/file.txt');
-    expect(init.method).toBe('PUT');
+    expect(init.method).toBe('POST');
     expect(init.headers.get('Content-Type')).toBe('text/plain');
+    expect(init.headers.get('x-content-source-authorization')).toBe('Bearer test-token');
     expect(result).toEqual({ success: true, path: 'media/file.txt' });
   });
 

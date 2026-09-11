@@ -310,9 +310,12 @@ export class AemAdminClient implements IAdminClient {
 
     const endpoint = `/${org}/sites/${repo}/media/${path}`;
     await this.request<unknown>(endpoint, {
-      method: 'PUT',
+      method: 'POST',
       body: bytes,
-      headers: { 'Content-Type': mimeType },
+      headers: {
+        'Content-Type': mimeType,
+        'x-content-source-authorization': `Bearer ${this.apiToken}`,
+      },
     });
 
     return { success: true, path };

@@ -18,6 +18,7 @@ import {
   AemAdminClientOptions,
   AemCopyResponse,
   AemFolderListingEntry,
+  AemMediaUploadResponse,
   AemPreviewLiveResponse,
   AemVersionListingEntry,
 } from './types';
@@ -309,13 +310,13 @@ export class AemAdminClient implements IAdminClient {
     }
 
     const endpoint = `/${org}/sites/${repo}/media/${path}`;
-    await this.request<unknown>(endpoint, {
+    const response = await this.request<AemMediaUploadResponse>(endpoint, {
       method: 'POST',
       body: bytes,
       headers: { 'Content-Type': mimeType },
     });
 
-    return { success: true, path };
+    return { success: true, path, url: response.uri };
   }
 
   async previewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {

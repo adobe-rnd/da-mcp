@@ -312,10 +312,7 @@ export class AemAdminClient implements IAdminClient {
     await this.request<unknown>(endpoint, {
       method: 'POST',
       body: bytes,
-      headers: {
-        'Content-Type': mimeType,
-        'x-content-source-authorization': `Bearer ${this.apiToken}`,
-      },
+      headers: { 'Content-Type': mimeType },
     });
 
     return { success: true, path };

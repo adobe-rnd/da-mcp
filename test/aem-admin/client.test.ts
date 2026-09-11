@@ -265,7 +265,6 @@ describe('AemAdminClient', () => {
     expect(url).toBe('https://api.aem.live/acme/sites/site1/media/media/file.txt');
     expect(init.method).toBe('POST');
     expect(init.headers.get('Content-Type')).toBe('text/plain');
-    expect(init.headers.get('x-content-source-authorization')).toBe('Bearer test-token');
     expect(result).toEqual({ success: true, path: 'media/file.txt' });
   });
 

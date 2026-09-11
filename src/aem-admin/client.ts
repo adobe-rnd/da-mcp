@@ -316,7 +316,13 @@ export class AemAdminClient implements IAdminClient {
       headers: { 'Content-Type': mimeType },
     });
 
-    return { success: true, path, url: response.uri };
+    return {
+      success: true,
+      path,
+      url: response.uri,
+      ...(response.meta?.width ? { width: Number(response.meta.width) } : {}),
+      ...(response.meta?.height ? { height: Number(response.meta.height) } : {}),
+    };
   }
 
   async previewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {

@@ -248,7 +248,7 @@ describe('AemAdminClient', () => {
     expect(typeof result.data).toBe('string');
   });
 
-  it('uploadMedia POSTs decoded binary content and returns the uploaded media URI', async () => {
+  it('uploadMedia POSTs decoded binary content and returns the uploaded media URI, width, and height', async () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify({
       uri: 'https://main--site1--acme.aem.page/media_179215d07ba50c3de718fe84032ab683e64314853.jpg#width=711&height=417',
       meta: { type: 'image/jpeg', width: '711', height: '417' },
@@ -272,6 +272,8 @@ describe('AemAdminClient', () => {
       success: true,
       path: 'media/file.txt',
       url: 'https://main--site1--acme.aem.page/media_179215d07ba50c3de718fe84032ab683e64314853.jpg#width=711&height=417',
+      width: 711,
+      height: 417,
     });
   });
 

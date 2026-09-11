@@ -262,7 +262,7 @@ describe('AemAdminClient', () => {
     );
 
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe('https://api.aem.live/acme/sites/site1/source/media/file.txt');
+    expect(url).toBe('https://api.aem.live/acme/sites/site1/media/media/file.txt');
     expect(init.method).toBe('PUT');
     expect(init.headers.get('Content-Type')).toBe('text/plain');
     expect(result).toEqual({ success: true, path: 'media/file.txt' });

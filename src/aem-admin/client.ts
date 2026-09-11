@@ -308,7 +308,7 @@ export class AemAdminClient implements IAdminClient {
       bytes[i] = binaryString.charCodeAt(i);
     }
 
-    const endpoint = `/${org}/sites/${repo}/source/${path}`;
+    const endpoint = `/${org}/sites/${repo}/media/${path}`;
     await this.request<unknown>(endpoint, {
       method: 'PUT',
       body: bytes,

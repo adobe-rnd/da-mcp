@@ -455,12 +455,12 @@ function assertAllowedMimeType(mimeType: string): void {
   }
 }
 
-const MAX_MEDIA_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_MEDIA_SIZE_BYTES = 4.5 * 1024 * 1024; // 4.5MB
 
 function assertWithinSizeLimit(byteSize: number): void {
   if (byteSize > MAX_MEDIA_SIZE_BYTES) {
     throw new Error(
-      `File is too large (${byteSize} bytes). Maximum allowed size is ${MAX_MEDIA_SIZE_BYTES} bytes (5MB).`,
+      `File is too large (${byteSize} bytes). Maximum allowed size is ${MAX_MEDIA_SIZE_BYTES} bytes (4.5MB).`,
     );
   }
 }

@@ -535,8 +535,8 @@ describe('Handler path normalization', () => {
       );
     });
 
-    it('should reject base64Data larger than the 5MB size limit', async () => {
-      const oversizedBase64 = 'A'.repeat(7_000_000); // decodes to > 5MB
+    it('should reject base64Data larger than the 4.5MB size limit', async () => {
+      const oversizedBase64 = 'A'.repeat(7_000_000); // decodes to > 4.5MB
 
       const result = await handleUploadMedia(mockClient, {
         org: 'test',

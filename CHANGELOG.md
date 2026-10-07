@@ -1,3 +1,23 @@
+# [1.8.0](https://github.com/adobe-rnd/da-mcp/compare/v1.7.0...v1.8.0) (2026-10-07)
+
+
+### Bug Fixes
+
+* bound media downloads and use returned upload references ([ca420db](https://github.com/adobe-rnd/da-mcp/commit/ca420dbd06fdefa9970198d36c53083972abdef5))
+* enforce a 5MB size limit on da_upload_media ([ce2131c](https://github.com/adobe-rnd/da-mcp/commit/ce2131cd6825cb87abdb16b72f1432b43a75f085))
+* lower da_upload_media size limit to 4.5MB ([8a41339](https://github.com/adobe-rnd/da-mcp/commit/8a41339578a2413f7a4e55240865cce31100f0fb))
+* remove unnecessary x-content-source-authorization header from HLX6 media upload ([1d34c69](https://github.com/adobe-rnd/da-mcp/commit/1d34c696f28607f8e6aec7a3b2d078e258004e97))
+* restrict da_upload_media to an image MIME type allowlist ([d7e1111](https://github.com/adobe-rnd/da-mcp/commit/d7e1111773df5b3816ac9be002447f5ae2de0ba8))
+* use /media endpoint for HLX6 media uploads ([9b4bd01](https://github.com/adobe-rnd/da-mcp/commit/9b4bd01ec244134e831b7f2eee5466dfea6e40b8))
+* use POST (not PUT) for HLX6 media uploads ([f7712d6](https://github.com/adobe-rnd/da-mcp/commit/f7712d6d5d695a127b0e46d04cbc83dbb7925d2b))
+
+
+### Features
+
+* allow da_upload_media to fetch media from a public sourceUrl ([b07fb65](https://github.com/adobe-rnd/da-mcp/commit/b07fb65135b3dc242018da44b3e61e84838417ac))
+* return the uploaded media URI from HLX6 uploadMedia ([759ea41](https://github.com/adobe-rnd/da-mcp/commit/759ea416ac8f472cd6e882287ce6585c10332a6f))
+* return width/height metadata from HLX6 uploadMedia ([a19c371](https://github.com/adobe-rnd/da-mcp/commit/a19c371c3ece1a3f5f86e1991e59b118273b9038))
+
 # [1.7.0](https://github.com/adobe-rnd/da-mcp/compare/v1.6.0...v1.7.0) (2026-09-03)
 
 

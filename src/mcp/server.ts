@@ -183,16 +183,19 @@ export function createServer(client: IAdminClient, version: string): McpServer {
       + 'temporary asset URL with a short TTL). When using "sourceUrl", "mimeType" and "fileName" '
       + 'are auto-derived from the response and URL if not provided. '
       + 'Maximum file size is 4.5MB; larger files are rejected. '
-      + 'When uploading images referenced in a page (e.g. during page creation or update), '
-      + 'place the image in a child folder named after the page, sibling to the page file '
+      + 'Use the returned "url" to reference the uploaded image when present; otherwise use the returned "path". '
+      + 'Do not assume the requested "path" is the uploaded image location: the server may return a generated URL instead. '
+      + 'When choosing a requested path for images referenced in a page (e.g. during page creation or update), '
+      + 'use a child folder named after the page, sibling to the page file '
       + '(e.g. page at "docs/my-page.html" → image at "docs/.my-page/image.png" with the folder name with a leading dot). '
-      + 'For standalone media uploads unrelated to a specific page, use the "media" folder '
+      + 'For standalone uploads, request a path in the "media" folder '
       + '(e.g. "media/image.png").',
     inputSchema: z.object({
       org: z.string().describe('Organization name'),
       repo: z.string().describe('Site / Repository name'),
       path: z.string().describe(
-        'Destination path for the media file. '
+        'The requested destination path. Use the returned "url" when present, otherwise the returned "path"; '
+        + 'the server may return a generated URL instead of storing a file at this requested path. '
         + 'For page-related images use a dot-prefixed folder named after the page: "docs/.my-page/image.png". '
         + 'For standalone uploads use the media folder: "media/image.png".',
       ),

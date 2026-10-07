@@ -550,12 +550,36 @@ async function fetchMediaFromUrl(
       || (contentType ? contentType.split(';')[0].trim() : '')
       || 'application/octet-stream');
 
-    const arrayBuffer = await response.arrayBuffer();
-    const bytes = new Uint8Array(arrayBuffer);
-    assertWithinSizeLimit(bytes.length);
+    const chunks: Uint8Array[] = [];
+    let byteSize = 0;
+    const reader = response.body?.getReader();
+    if (reader) {
+      try {
+        for (;;) {
+          // eslint-disable-next-line no-await-in-loop
+          const { done, value } = await reader.read();
+          if (done) break;
+          byteSize += value.byteLength;
+          assertWithinSizeLimit(byteSize);
+          chunks.push(value);
+        }
+      } catch (error) {
+        await reader.cancel().catch(() => {});
+        throw error;
+      } finally {
+        reader.releaseLock();
+      }
+    }
+    const bytes = new Uint8Array(byteSize);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
 
-    return { base64Data: bytesToBase64(bytes), mimeType, byteSize: bytes.length };
+    return { base64Data: bytesToBase64(bytes), mimeType, byteSize };
   } catch (error) {
+    controller.abort();
     if (error instanceof Error && error.name === 'AbortError') {
       throw new Error(`Timed out fetching sourceUrl after ${UPLOAD_FETCH_TIMEOUT}ms`);
     }
@@ -629,14 +653,14 @@ export async function handleUploadMedia(
       fileName,
     );
 
-    // Return success with the media path for reference
+    // Return the generated media URL or legacy destination path for reference
     return {
       content: [
         {
           type: 'text',
           text: JSON.stringify({
-            message: `Media uploaded successfully to ${args.path}`,
-            path: args.path,
+            message: `Media uploaded successfully to ${response.url || args.path}`,
+            ...(response.url ? {} : { path: args.path }),
             fileName,
             mimeType,
             byteSize,

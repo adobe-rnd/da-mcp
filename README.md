@@ -79,6 +79,13 @@ src/
 | `da_publish_content` | Publish a document to live |
 | `da_unpublish_content` | Remove a document from live (unpublish) |
 
+`da_upload_media` accepts files up to 4.5 MiB. URL downloads are stopped when the
+actual byte count exceeds this limit, even without a trustworthy `Content-Length`.
+Use the returned `url` to reference uploaded media when present; otherwise use the
+returned `path`. The server selects the storage backend automatically. Do not assume
+the requested `path` is the uploaded image's location: the result may contain a generated
+URL instead of a source file at that path.
+
 ## Prerequisites
 
 - Node.js 18+ and npm

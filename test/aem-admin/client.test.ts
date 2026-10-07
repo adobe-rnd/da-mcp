@@ -265,12 +265,11 @@ describe('AemAdminClient', () => {
     );
 
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe('https://api.aem.live/acme/sites/site1/media/media/file.txt');
+    expect(url).toBe('https://api.aem.live/acme/sites/site1/media/');
     expect(init.method).toBe('POST');
     expect(init.headers.get('Content-Type')).toBe('text/plain');
     expect(result).toEqual({
       success: true,
-      path: 'media/file.txt',
       url: 'https://main--site1--acme.aem.page/media_179215d07ba50c3de718fe84032ab683e64314853.jpg#width=711&height=417',
       width: 711,
       height: 417,

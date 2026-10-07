@@ -297,7 +297,8 @@ export class AemAdminClient implements IAdminClient {
   async uploadMedia(
     org: string,
     repo: string,
-    path: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _path: string,
     base64Data: string,
     mimeType: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -309,7 +310,7 @@ export class AemAdminClient implements IAdminClient {
       bytes[i] = binaryString.charCodeAt(i);
     }
 
-    const endpoint = `/${org}/sites/${repo}/media/${path}`;
+    const endpoint = `/${org}/sites/${repo}/media/`;
     const response = await this.request<AemMediaUploadResponse>(endpoint, {
       method: 'POST',
       body: bytes,
@@ -318,7 +319,6 @@ export class AemAdminClient implements IAdminClient {
 
     return {
       success: true,
-      path,
       url: response.uri,
       ...(response.meta?.width ? { width: Number(response.meta.width) } : {}),
       ...(response.meta?.height ? { height: Number(response.meta.height) } : {}),

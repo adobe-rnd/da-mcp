@@ -73,11 +73,18 @@ src/
 | `da_get_version` | Get the content of a specific version of a file |
 | `da_lookup_media` | Lookup media references |
 | `da_lookup_fragment` | Lookup fragment references |
-| `da_upload_media` | Upload an image or media file |
+| `da_upload_media` | Upload a media file from base64 data or a public `sourceUrl` (e.g. a Firefly temporary asset URL) |
 | `da_preview_content` | Preview (create/update) a document |
 | `da_unpreview_content` | Remove a document's preview |
 | `da_publish_content` | Publish a document to live |
 | `da_unpublish_content` | Remove a document from live (unpublish) |
+
+`da_upload_media` accepts files up to 4.5 MiB. URL downloads are stopped when the
+actual byte count exceeds this limit, even without a trustworthy `Content-Length`.
+Use the returned `url` to reference uploaded media when present; otherwise use the
+returned `path`. The server selects the storage backend automatically. Do not assume
+the requested `path` is the uploaded image's location: the result may contain a generated
+URL instead of a source file at that path.
 
 ## Prerequisites
 

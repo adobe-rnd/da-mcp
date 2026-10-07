@@ -66,6 +66,9 @@ export interface DAOperationResponse {
   editUrl?: string;
   previewUrl?: string;
   liveUrl?: string;
+  url?: string;
+  width?: number;
+  height?: number;
 }
 
 export interface DAAdminClientOptions {

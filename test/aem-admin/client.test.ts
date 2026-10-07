@@ -248,8 +248,11 @@ describe('AemAdminClient', () => {
     expect(typeof result.data).toBe('string');
   });
 
-  it('uploadMedia PUTs decoded binary content with the given mime type', async () => {
-    fetchMock.mockResolvedValue(new Response('', { status: 200, headers: {} }));
+  it('uploadMedia POSTs decoded binary content and returns the uploaded media URI, width, and height', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({
+      uri: 'https://main--site1--acme.aem.page/media_179215d07ba50c3de718fe84032ab683e64314853.jpg#width=711&height=417',
+      meta: { type: 'image/jpeg', width: '711', height: '417' },
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
     const base64Data = btoa('hello');
 
     const result = await client.uploadMedia(
@@ -262,10 +265,15 @@ describe('AemAdminClient', () => {
     );
 
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe('https://api.aem.live/acme/sites/site1/source/media/file.txt');
-    expect(init.method).toBe('PUT');
+    expect(url).toBe('https://api.aem.live/acme/sites/site1/media/');
+    expect(init.method).toBe('POST');
     expect(init.headers.get('Content-Type')).toBe('text/plain');
-    expect(result).toEqual({ success: true, path: 'media/file.txt' });
+    expect(result).toEqual({
+      success: true,
+      url: 'https://main--site1--acme.aem.page/media_179215d07ba50c3de718fe84032ab683e64314853.jpg#width=711&height=417',
+      width: 711,
+      height: 417,
+    });
   });
 
   it('lookupFragment falls back to a plain GET on the fragment path', async () => {

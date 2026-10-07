@@ -18,6 +18,7 @@ import {
   AemAdminClientOptions,
   AemCopyResponse,
   AemFolderListingEntry,
+  AemMediaUploadResponse,
   AemPreviewLiveResponse,
   AemVersionListingEntry,
 } from './types';
@@ -296,10 +297,9 @@ export class AemAdminClient implements IAdminClient {
   async uploadMedia(
     org: string,
     repo: string,
-    path: string,
+    _path: string,
     base64Data: string,
     mimeType: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _fileName: string,
   ): Promise<DAOperationResponse> {
     const binaryString = atob(base64Data);
@@ -308,14 +308,19 @@ export class AemAdminClient implements IAdminClient {
       bytes[i] = binaryString.charCodeAt(i);
     }
 
-    const endpoint = `/${org}/sites/${repo}/source/${path}`;
-    await this.request<unknown>(endpoint, {
-      method: 'PUT',
+    const endpoint = `/${org}/sites/${repo}/media/`;
+    const response = await this.request<AemMediaUploadResponse>(endpoint, {
+      method: 'POST',
       body: bytes,
       headers: { 'Content-Type': mimeType },
     });
 
-    return { success: true, path };
+    return {
+      success: true,
+      url: response.uri,
+      ...(response.meta?.width ? { width: Number(response.meta.width) } : {}),
+      ...(response.meta?.height ? { height: Number(response.meta.height) } : {}),
+    };
   }
 
   async previewContent(org: string, repo: string, path: string): Promise<DAOperationResponse> {

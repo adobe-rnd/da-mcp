@@ -11,6 +11,17 @@ describe('createServer preview/publish tool registration', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const registeredTools = (server as any)._registeredTools;
 
+  it('documents returned upload references without requiring backend knowledge', () => {
+    const tool = registeredTools.da_upload_media;
+    expect(tool.description).not.toMatch(/HLX6|legacy/i);
+    expect(tool.description).toContain('returned "url"');
+    expect(tool.description).toContain('returned "path"');
+    expect(tool.description).toContain('Do not assume');
+    expect(tool.inputSchema.shape.path.description).not.toMatch(/HLX6|legacy/i);
+    expect(tool.inputSchema.shape.path.description).toContain('requested');
+    expect(tool.inputSchema.shape.path.description).toContain('returned');
+  });
+
   it('registers all four preview/publish tools', () => {
     expect(Object.keys(registeredTools)).toEqual(expect.arrayContaining([
       'da_preview_content',

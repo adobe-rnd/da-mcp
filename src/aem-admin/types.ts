@@ -45,3 +45,12 @@ export interface AemAdminClientOptions {
   baseUrl?: string;
   timeout?: number;
 }
+
+export interface AemMediaUploadResponse {
+  uri: string;
+  meta?: {
+    type?: string;
+    width?: string;
+    height?: string;
+  };
+}

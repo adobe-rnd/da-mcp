@@ -297,11 +297,9 @@ export class AemAdminClient implements IAdminClient {
   async uploadMedia(
     org: string,
     repo: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _path: string,
     base64Data: string,
     mimeType: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _fileName: string,
   ): Promise<DAOperationResponse> {
     const binaryString = atob(base64Data);

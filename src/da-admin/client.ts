@@ -379,11 +379,8 @@ export class DAAdminClient implements IAdminClient {
    * endpoint path, not a bare identifier to be combined with org/repo/path.
    */
   async getVersion(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _org: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _repo: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _path: string,
     versionId: string,
   ): Promise<DASourceContent> {

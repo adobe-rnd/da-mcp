@@ -5,6 +5,7 @@
 
 import { DAAPIError, IAdminClient } from '../da-admin/types';
 import { normalizePath, normalizePagePath, stripFileExtension } from '../utils/path';
+import { searchSources, SearchSourcesParams } from '../da-admin/search';
 
 /**
  * Format error for MCP client
@@ -43,6 +44,39 @@ export async function handleListSources(
         {
           type: 'text',
           text: JSON.stringify(response, null, 2),
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: formatError(error),
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
+/**
+ * Handler for da_search_sources tool
+ */
+export async function handleSearchSources(
+  client: IAdminClient,
+  args: SearchSourcesParams,
+) {
+  try {
+    const result = await searchSources(client, {
+      ...args,
+      path: normalizePath(args.path || '') || '',
+    });
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
         },
       ],
     };

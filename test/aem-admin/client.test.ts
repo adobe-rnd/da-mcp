@@ -93,14 +93,16 @@ describe('AemAdminClient', () => {
     });
   });
 
-  it('updateSource PUTs the raw content', async () => {
+  it('updateSource POSTs the raw content with If-Match: * so external images get interned', async () => {
     fetchMock.mockResolvedValue(new Response('', { status: 200, headers: {} }));
 
     const result = await client.updateSource('acme', 'site1', 'docs/page.html', '<p>updated</p>', 'text/html');
 
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe('https://api.aem.live/acme/sites/site1/source/docs/page.html');
-    expect(init.method).toBe('PUT');
+    expect(init.method).toBe('POST');
+    expect(init.headers.get('If-Match')).toBe('*');
+    expect(init.headers.get('Content-Type')).toBe('text/html');
     expect(init.body).toBe('<p>updated</p>');
     expect(result).toEqual({
       success: true,

@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/adobe-rnd/da-mcp/compare/v1.8.0...v1.8.1) (2026-10-09)
+
+
+### Bug Fixes
+
+* send hlx6 source updates as POST with If-Match: * to intern external images ([96bdf08](https://github.com/adobe-rnd/da-mcp/commit/96bdf0890e9ebe3ce50bddd9a6eacd9d1b2be306)), closes [#43](https://github.com/adobe-rnd/da-mcp/issues/43)
+
 # [1.8.0](https://github.com/adobe-rnd/da-mcp/compare/v1.7.0...v1.8.0) (2026-10-07)
 
 

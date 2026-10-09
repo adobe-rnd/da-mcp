@@ -186,9 +186,9 @@ export class AemAdminClient implements IAdminClient {
   ): Promise<DAOperationResponse> {
     const endpoint = `/${org}/sites/${repo}/source/${path}`;
     await this.request<unknown>(endpoint, {
-      method: 'PUT',
+      method: 'POST',
       body: content,
-      headers: { 'Content-Type': contentType },
+      headers: { 'Content-Type': contentType, 'If-Match': '*' },
     });
     return {
       success: true, path, editUrl: buildEditUrl(org, repo, path), ...buildAemUrls(org, repo, path),
